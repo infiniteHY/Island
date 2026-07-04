@@ -1,0 +1,131 @@
+{
+  "meta": {
+    "width": 1672,
+    "height": 941,
+    "version": 1
+  },
+  "startNodeId": "center",
+  "nodes": [
+    { "id": "center", "x": 842, "y": 585 },
+    { "id": "center_steps", "x": 850, "y": 505 },
+    { "id": "plaza", "x": 868, "y": 448 },
+    { "id": "north_cross", "x": 829, "y": 385 },
+    { "id": "west_cross", "x": 650, "y": 512 },
+    { "id": "east_cross", "x": 1037, "y": 519 },
+    { "id": "south_cross", "x": 836, "y": 660 },
+    { "id": "library_bend", "x": 718, "y": 388 },
+    { "id": "library_gate", "x": 610, "y": 355 },
+    { "id": "sports_bend", "x": 560, "y": 540 },
+    { "id": "sports_gate", "x": 468, "y": 560 },
+    { "id": "finance_bend", "x": 1108, "y": 452 },
+    { "id": "finance_gate", "x": 1180, "y": 390 },
+    { "id": "arcade_bend", "x": 1112, "y": 575 },
+    { "id": "arcade_gate", "x": 1180, "y": 625 },
+    { "id": "jazz_bend", "x": 928, "y": 712 },
+    { "id": "jazz_gate", "x": 1012, "y": 762 }
+  ],
+  "edges": [
+    { "from": "center", "to": "center_steps" },
+    { "from": "center_steps", "to": "plaza" },
+    { "from": "plaza", "to": "north_cross" },
+    { "from": "center", "to": "west_cross" },
+    { "from": "center", "to": "east_cross" },
+    { "from": "center", "to": "south_cross" },
+    { "from": "plaza", "to": "west_cross" },
+    { "from": "plaza", "to": "east_cross" },
+    { "from": "north_cross", "to": "library_bend" },
+    { "from": "library_bend", "to": "library_gate" },
+    { "from": "west_cross", "to": "sports_bend" },
+    { "from": "sports_bend", "to": "sports_gate" },
+    { "from": "east_cross", "to": "finance_bend" },
+    { "from": "finance_bend", "to": "finance_gate" },
+    { "from": "east_cross", "to": "arcade_bend" },
+    { "from": "arcade_bend", "to": "arcade_gate" },
+    { "from": "south_cross", "to": "jazz_bend" },
+    { "from": "jazz_bend", "to": "jazz_gate" },
+    { "from": "west_cross", "to": "south_cross" },
+    { "from": "east_cross", "to": "south_cross" }
+  ],
+  "buildings": [
+    {
+      "id": "library",
+      "name": "图书馆",
+      "targetNodeId": "library_gate",
+      "title": "图书馆",
+      "subtitle": "收藏我读过的书与笔记，知识是我探索世界的基石。",
+      "route": "/library",
+      "hotspot": {
+        "type": "polygon",
+        "points": [[492, 186], [685, 149], [775, 377], [575, 454], [452, 341]]
+      },
+      "effects": {
+        "hover": "glow",
+        "arrival": "book_pages"
+      }
+    },
+    {
+      "id": "sports",
+      "name": "体育馆",
+      "targetNodeId": "sports_gate",
+      "title": "体育馆",
+      "subtitle": "记录运动与健康，记录身体的进步与能量累积。",
+      "route": "/sports",
+      "hotspot": {
+        "type": "polygon",
+        "points": [[286, 431], [526, 389], [615, 577], [422, 690], [258, 580]]
+      },
+      "effects": {
+        "hover": "pulse",
+        "arrival": "heartbeat"
+      }
+    },
+    {
+      "id": "finance",
+      "name": "金融交易所",
+      "targetNodeId": "finance_gate",
+      "title": "金融交易所",
+      "subtitle": "记录投资与思考，市场是预能力的一面镜子。",
+      "route": "/finance",
+      "hotspot": {
+        "type": "polygon",
+        "points": [[1098, 255], [1310, 228], [1402, 432], [1195, 534], [1060, 397]]
+      },
+      "effects": {
+        "hover": "line_chart",
+        "arrival": "candles"
+      }
+    },
+    {
+      "id": "arcade",
+      "name": "游戏厅",
+      "targetNodeId": "arcade_gate",
+      "title": "游戏厅",
+      "subtitle": "小游戏、Hackathon、实验项目，在游戏中挑战自我。",
+      "route": "/arcade",
+      "hotspot": {
+        "type": "polygon",
+        "points": [[1082, 523], [1287, 496], [1365, 666], [1169, 752], [1046, 637]]
+      },
+      "effects": {
+        "hover": "neon",
+        "arrival": "pixel_burst"
+      }
+    },
+    {
+      "id": "jazz",
+      "name": "爵士酒吧",
+      "targetNodeId": "jazz_gate",
+      "title": "爵士酒吧",
+      "subtitle": "贝斯、音乐与节奏，沉浸在音乐与氛围中。",
+      "route": "/jazz",
+      "hotspot": {
+        "type": "polygon",
+        "points": [[905, 661], [1110, 624], [1195, 790], [1009, 915], [855, 801]]
+      },
+      "effects": {
+        "hover": "warm_light",
+        "arrival": "jazz_door"
+      }
+    }
+  ]
+}

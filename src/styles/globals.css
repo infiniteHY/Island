@@ -1,0 +1,989 @@
+/* ============================================================
+   Site v3 「Editorial HUD」— design tokens
+   spec: docs/site-redesign-v3.md
+   (旧 Phaser 小岛的样式已归档到 src/styles/world.css,
+    恢复游戏页入口时再引入)
+   ============================================================ */
+
+@font-face {
+  font-family: "Inspire Mono";
+  src: url("/fonts/InspireMono-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inspire Mono";
+  src: url("/fonts/InspireMono-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light;
+  --label: 0, 0, 0;
+  --label-d: 54, 54, 48;
+  --bg-deep: 245, 243, 238; /* zed: color-mix(cream, white 92%) 纸感 */
+  --bg-elevated: #fdfcfa;
+  --label-1: rgba(var(--label), 1);
+  --label-2: rgba(var(--label-d), 0.6);
+  --label-3: rgba(var(--label-d), 0.32);
+  --label-4: rgba(var(--label-d), 0.18);
+  --line: rgba(var(--label-d), 0.14);
+  /* light = zed 工程图纸:签名蓝 + 硬偏移套版阴影 + 虚线 */
+  --accent: #1e69f6;
+  --accent-soft: rgba(30, 105, 246, 0.08);
+  --accent-rgb: 30, 105, 246;
+  --sh-card: 5px 5px 0 rgba(61, 125, 245, 0.1), -5px -5px 0 rgba(58, 125, 248, 0.1);
+  --rule-style: dashed;
+  --weight-display: 620; /* zed: 大而轻 */
+  --accent-contrast: #fff;
+
+  --font-mono: "Inspire Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB",
+    "Segoe UI", "Microsoft YaHei", sans-serif;
+  --font-serif: "Georgia", "Songti SC", "STSong", serif;
+
+  --ease-hud: cubic-bezier(0.66, 0, 0.01, 1);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --gutter: clamp(16px, 4vw, 56px);
+}
+
+.dark {
+  color-scheme: dark;
+  --label: 255, 255, 255;
+  --label-d: 230, 232, 232;
+  --bg-deep: 15, 17, 17;
+  --bg-elevated: #191b1b;
+  --label-2: rgba(var(--label-d), 0.6);
+  --label-3: rgba(var(--label-d), 0.32);
+  --label-4: rgba(var(--label-d), 0.16);
+  --line: rgba(var(--label-d), 0.08);
+  /* dark = 科幻 HUD:酸性绿,无套版阴影 */
+  --accent: #c0fe04;
+  --accent-soft: rgba(192, 254, 4, 0.08);
+  --accent-rgb: 192, 254, 4;
+  --sh-card: none;
+  --rule-style: solid;
+  --weight-display: 700;
+  --accent-contrast: #000;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: rgb(var(--bg-deep));
+  color: var(--label-1);
+  font-family: var(--font-sans);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition:
+    background-color 300ms var(--ease-hud),
+    color 300ms var(--ease-hud);
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.label-3 {
+  color: var(--label-3);
+}
+
+/* ---------- header ---------- */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 3vw, 40px);
+  padding: 14px var(--gutter);
+  border-bottom: 1px var(--rule-style) var(--line);
+  background: rgba(var(--bg-deep), 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.site-logo {
+  font-weight: 700;
+}
+
+.site-nav {
+  display: flex;
+  gap: 20px;
+}
+
+.site-nav a,
+.theme-toggle {
+  color: var(--label-2);
+  transition: color 150ms ease-out;
+}
+
+.site-nav a:hover,
+.theme-toggle:hover {
+  color: var(--label-1);
+}
+
+.site-hud {
+  display: flex;
+  gap: 20px;
+  margin-left: auto;
+  color: var(--label-3);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.hud-clock {
+  min-width: 9ch;
+}
+
+/* ---------- hero ---------- */
+
+.hero {
+  position: relative;
+  padding: clamp(72px, 14vh, 160px) var(--gutter) clamp(56px, 10vh, 120px);
+}
+
+.hero-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hero > :not(.hero-particles) {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-title {
+  margin: 0;
+  font-size: clamp(2.6rem, 8.5vw, 7.5rem);
+  font-weight: var(--weight-display);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+}
+
+.hero-line {
+  display: block;
+  overflow: hidden;
+}
+
+.hero-line-inner {
+  display: block;
+  will-change: transform;
+}
+
+.hero-intro {
+  max-width: 34em;
+  margin: clamp(28px, 5vh, 48px) 0 0;
+  color: var(--label-2);
+  font-size: clamp(1rem, 1.4vw, 1.15rem);
+  line-height: 1.9;
+}
+
+.hero-intro .mono {
+  margin-left: 0.8em;
+}
+
+/* ---------- modules ---------- */
+
+.modules {
+  position: relative;
+  padding: clamp(48px, 8vh, 96px) var(--gutter);
+  border-top: 1px var(--rule-style) var(--line);
+}
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: clamp(24px, 4vh, 44px);
+}
+
+.section-title {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--label-2);
+}
+
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.module-card {
+  position: relative;
+  background: var(--bg-elevated);
+  border-radius: 24px; /* squircle clip-path 生效时被覆盖 */
+  transition: background-color 300ms var(--ease-hud);
+}
+
+.module-head {
+  display: block;
+  width: 100%;
+  padding: 22px 22px 24px;
+  text-align: left;
+}
+
+.module-head:disabled {
+  cursor: default;
+}
+
+.is-locked {
+  opacity: 0.52;
+}
+
+.module-meta {
+  display: flex;
+  justify-content: space-between;
+  padding-right: 40px; /* 给右上角展开按钮留位 */
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--label-3);
+}
+
+.module-title {
+  margin: 34px 0 0;
+  font-size: clamp(1.35rem, 2vw, 1.7rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.module-kicker {
+  margin: 6px 0 0;
+}
+
+.module-description {
+  margin: 12px 0 0;
+  color: var(--label-2);
+  font-size: 0.92rem;
+  line-height: 1.75;
+  min-height: 3.5em; /* 预留两行,同一行卡片(如投资理财/展览馆)高度对齐 */
+}
+
+.module-arrow {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--label-2);
+  font-size: 0.9rem;
+  transition:
+    border-color 150ms ease-out,
+    color 150ms ease-out,
+    transform 150ms ease-out;
+}
+
+.module-head:hover .module-arrow {
+  border-color: var(--label-2);
+  color: var(--label-1);
+  transform: translate(1px, -1px);
+}
+
+.module-head:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  border-radius: inherit;
+}
+
+.module-items {
+  overflow: hidden;
+}
+
+.module-items ul {
+  margin: 0;
+  padding: 0 22px 22px;
+  list-style: none;
+}
+
+.module-items li {
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+}
+
+.item-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.item-row h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.module-items p {
+  margin: 6px 0 0;
+  color: var(--label-2);
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+
+/* ---------- work: 坐标尺背景 + 分组作品面板 ---------- */
+
+.work {
+  position: relative;
+  padding: clamp(48px, 8vh, 96px) var(--gutter);
+  border-top: 1px var(--rule-style) var(--line);
+  overflow: hidden;
+}
+
+/* zed 式坐标尺背景:细密刻度 + 每 10 格主刻度,底部一行编号 */
+.work::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(
+      to right,
+      var(--line) 0 1px,
+      transparent 1px calc(10% / 4)
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      var(--line) 0 1px,
+      transparent 1px calc(10% / 4)
+    );
+  background-size: 100% 8px, 8px 100%;
+  background-repeat: repeat-y, repeat-x;
+  background-position: top, left;
+  opacity: 0.55;
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.9),
+    rgba(0, 0, 0, 0.25) 18%,
+    rgba(0, 0, 0, 0.18) 82%,
+    rgba(0, 0, 0, 0.9)
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.9),
+    rgba(0, 0, 0, 0.25) 18%,
+    rgba(0, 0, 0, 0.18) 82%,
+    rgba(0, 0, 0, 0.9)
+  );
+}
+
+/* 主刻度长线 */
+.work::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--label-3) 0 1px,
+    transparent 1px 10%
+  );
+  opacity: 0.5;
+}
+
+.work-ruler {
+  position: absolute;
+  top: 24px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 4px;
+  pointer-events: none;
+}
+
+.ruler-num {
+  font-size: 0.62rem;
+  color: var(--label-4);
+  font-variant-numeric: tabular-nums;
+}
+
+.work .section-head,
+.work-body {
+  position: relative;
+  z-index: 1;
+}
+
+.work-group {
+  margin-top: clamp(24px, 3.5vh, 40px);
+}
+
+.work-group-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 18px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--label-2);
+}
+
+.group-tick {
+  width: 10px;
+  height: 10px;
+  background: var(--accent);
+}
+
+/* 一行三个 */
+.work-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(14px, 2vw, 28px);
+}
+
+.work-panel {
+  position: relative;
+  display: block;
+  text-decoration: none;
+}
+
+.work-cover {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  background: var(--bg-elevated);
+}
+
+/* 滚动形变层:承接 skewY / scaleY,轻微放大避免斜切露边 */
+.work-deform {
+  position: absolute;
+  inset: -8% -2%;
+  transform-origin: center;
+  will-change: transform;
+}
+
+.work-cover img,
+.work-cover-fill {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: grid;
+  place-items: center;
+  transition: transform 600ms var(--ease-out-quint);
+}
+
+.work-glyph {
+  font-size: clamp(2.4rem, 4vw, 4rem);
+  color: rgba(255, 255, 255, 0.85);
+  font-family: var(--font-mono);
+}
+
+/* haoqi 式掀开遮布:与页面同色,向上收起像掀开一张纸 */
+.work-veil {
+  position: absolute;
+  inset: -1px;
+  z-index: 2;
+  background: rgb(var(--bg-deep));
+  border-bottom: 1px solid var(--line);
+  will-change: transform;
+}
+
+.work-chip {
+  position: absolute;
+  top: -0.6em;
+  right: 10px;
+  z-index: 3;
+  padding: 3px 8px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 700;
+}
+
+.work-caption {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.work-title {
+  font-weight: 700;
+  color: var(--label-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.work-meta {
+  display: inline-flex;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.work-panel:hover .work-cover img,
+.work-panel:hover .work-cover-fill {
+  transform: scale(1.05);
+}
+
+a.work-panel:hover .work-title {
+  color: var(--accent);
+}
+
+@media (max-width: 1100px) {
+  .work-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .work-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .work-ruler {
+    display: none;
+  }
+}
+
+/* ---------- cta ---------- */
+
+.cta {
+  position: relative;
+  padding: clamp(80px, 16vh, 180px) var(--gutter);
+  border-top: 1px var(--rule-style) var(--line);
+}
+
+.cta-line {
+  margin: 0;
+  font-size: clamp(2.4rem, 7.5vw, 6.5rem);
+  font-weight: var(--weight-display);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+
+/* ---------- footer ---------- */
+
+.site-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding: clamp(48px, 10vh, 96px) var(--gutter) 40px;
+  border-top: 1px var(--rule-style) var(--line);
+}
+
+.footer-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.footer-title {
+  margin: 0;
+  font-size: clamp(1.4rem, 3vw, 2.4rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--label-1);
+}
+
+.footer-links {
+  display: flex;
+  gap: 20px;
+}
+
+.footer-links a {
+  color: var(--label-2);
+  transition: color 150ms ease-out;
+}
+
+.footer-links a:hover {
+  color: var(--accent);
+}
+
+.footer-note {
+  margin: 0;
+}
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 1024px) {
+  .module-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .hud-pointer {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .module-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .site-nav {
+    display: none;
+  }
+}
+
+/* 分区线交点 + 十字标记(zed 工程图纸) */
+.modules::before,
+.cta::before {
+  content: "+";
+  position: absolute;
+  top: -0.72em;
+  left: calc(var(--gutter) - 0.45em);
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  color: var(--label-3);
+  background: rgb(var(--bg-deep));
+  padding: 0 0.2em;
+  line-height: 1;
+  transition: background-color 300ms var(--ease-hud);
+}
+
+/* 衬线斜体强调(zed: Plex Serif Italic 引语) */
+.em-serif {
+  font-family: var(--font-serif);
+  font-style: italic;
+  letter-spacing: 0.01em;
+  color: var(--label-1);
+}
+
+/* 导航/按钮的单键快捷键徽章 */
+.key-hint {
+  display: inline-block;
+  margin-left: 0.45em;
+  padding: 0 0.35em;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font-size: 0.85em;
+  color: var(--label-3);
+  transition: color 150ms ease-out, border-color 150ms ease-out;
+}
+
+a:hover .key-hint,
+button:hover .key-hint {
+  color: var(--accent);
+  border-color: rgba(var(--accent-rgb), 0.4);
+}
+
+/* ---------- fx: sci-fi layer ---------- */
+
+/* 背景氛围:点阵网格 + 聚光灯 + 扫描线 */
+.atmosphere {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.atmo-grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(var(--label-d), 0.14) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(
+    480px circle at var(--spot-x, 50%) var(--spot-y, 30%),
+    rgba(0, 0, 0, 0.9),
+    rgba(0, 0, 0, 0.22) 60%,
+    rgba(0, 0, 0, 0.12)
+  );
+  -webkit-mask-image: radial-gradient(
+    480px circle at var(--spot-x, 50%) var(--spot-y, 30%),
+    rgba(0, 0, 0, 0.9),
+    rgba(0, 0, 0, 0.22) 60%,
+    rgba(0, 0, 0, 0.12)
+  );
+}
+
+.atmo-spot {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    420px circle at var(--spot-x, 50%) var(--spot-y, 30%),
+    rgba(var(--accent-rgb), 0.07),
+    transparent 70%
+  );
+}
+
+.atmo-scanline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -20%;
+  height: 22vh;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(var(--label-d), 0.045),
+    transparent
+  );
+  animation: scan-sweep 9s linear infinite;
+}
+
+@keyframes scan-sweep {
+  from {
+    transform: translateY(-30vh);
+  }
+  to {
+    transform: translateY(150vh);
+  }
+}
+
+/* 站点内容抬到氛围层之上 */
+.site > *:not(.atmosphere):not(.crosshair) {
+  position: relative;
+  z-index: 1;
+}
+
+/* 十字准星光标 */
+.has-crosshair,
+.has-crosshair a,
+.has-crosshair button {
+  cursor: none;
+}
+
+.crosshair {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+}
+
+.crosshair-h,
+.crosshair-v {
+  position: absolute;
+  background: rgba(var(--label-d), 0.22);
+  transition: background 200ms var(--ease-hud);
+}
+
+.crosshair-h {
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+}
+
+.crosshair-v {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+}
+
+.crosshair-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 28px;
+  height: 28px;
+  margin: -14px 0 0 -14px;
+  border: 1px solid rgba(var(--label-d), 0.55);
+  border-radius: 50%;
+  transition:
+    width 250ms var(--ease-hud),
+    height 250ms var(--ease-hud),
+    margin 250ms var(--ease-hud),
+    border-color 250ms var(--ease-hud),
+    background-color 250ms var(--ease-hud);
+}
+
+.crosshair-ring::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 3px;
+  height: 3px;
+  margin: -1.5px 0 0 -1.5px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* 悬停可交互元素:准星锁定态 */
+.cursor-lock .crosshair-ring {
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  border-color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.08);
+  animation: ring-pulse 1.2s ease-in-out infinite;
+}
+
+.cursor-lock .crosshair-h,
+.cursor-lock .crosshair-v {
+  background: rgba(var(--accent-rgb), 0.35);
+}
+
+@keyframes ring-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(var(--accent-rgb), 0);
+  }
+}
+
+/* hero 顶部 boot 行 */
+.hero-boot {
+  margin: 0 0 clamp(20px, 4vh, 40px);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 卡片瞄准框:hover 时四角浮现 accent 角标 */
+.module-card::before,
+.module-card::after,
+.module-head::before,
+.module-head::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  opacity: 0;
+  transition: opacity 200ms var(--ease-hud), transform 200ms var(--ease-hud);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.module-card::before {
+  top: 10px;
+  left: 10px;
+  border-top: 1.5px solid var(--accent);
+  border-left: 1.5px solid var(--accent);
+  transform: translate(4px, 4px);
+}
+
+.module-card::after {
+  top: 10px;
+  right: 10px;
+  border-top: 1.5px solid var(--accent);
+  border-right: 1.5px solid var(--accent);
+  transform: translate(-4px, 4px);
+}
+
+.module-head::before {
+  bottom: 10px;
+  left: 10px;
+  border-bottom: 1.5px solid var(--accent);
+  border-left: 1.5px solid var(--accent);
+  transform: translate(4px, -4px);
+}
+
+.module-head::after {
+  bottom: 10px;
+  right: 10px;
+  border-bottom: 1.5px solid var(--accent);
+  border-right: 1.5px solid var(--accent);
+  transform: translate(-4px, -4px);
+}
+
+.module-card:not(.is-locked):hover::before,
+.module-card:not(.is-locked):hover::after,
+.module-card:not(.is-locked):hover .module-head::before,
+.module-card:not(.is-locked):hover .module-head::after {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+
+/* 卡片:zed 套版硬偏移阴影(drop-shadow 跟随 squircle 轮廓) */
+.module-grid {
+  --card-shadow: var(--sh-card);
+}
+
+.module-card {
+  filter: drop-shadow(5px 5px 0 rgba(var(--accent-rgb), 0))
+    drop-shadow(-5px -5px 0 rgba(var(--accent-rgb), 0));
+}
+
+.module-card:not(.is-locked) {
+  transition:
+    background-color 300ms var(--ease-hud),
+    transform 250ms var(--ease-hud),
+    filter 250ms var(--ease-hud);
+}
+
+.module-card:not(.is-locked):hover {
+  transform: translateY(-3px);
+  filter: drop-shadow(5px 5px 0 rgba(var(--accent-rgb), 0.12))
+    drop-shadow(-5px -5px 0 rgba(var(--accent-rgb), 0.12));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atmo-scanline,
+  .atmo-spot {
+    display: none;
+  }
+
+  .module-card:not(.is-locked):hover {
+    transform: none;
+  }
+}
+
+/* ---------- motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
