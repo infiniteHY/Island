@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useSiteStore } from "./siteStore";
 import { Header } from "./Header";
-import { Hero } from "./Hero";
+import { BottleHero } from "./glass-bottle/BottleHero";
 import { Work } from "./Work";
 import { Cta } from "./Cta";
 import { Footer } from "./Footer";
@@ -30,7 +30,7 @@ export function Site() {
       <Crosshair />
       <Header />
       <main>
-        <Hero />
+        <BottleHero />
         <Work />
         <Cta />
       </main>

@@ -2,6 +2,11 @@ import { motion } from "motion/react";
 import { useSiteStore } from "./siteStore";
 import { Scramble } from "./fx/Scramble";
 
+const contact = {
+  email: "1277530323@qq.com",
+  github: "https://github.com/infiniteHY"
+};
+
 export function Footer() {
   const reducedMotion = useSiteStore((state) => state.reducedMotion);
 
@@ -18,17 +23,16 @@ export function Footer() {
           <Scramble text="LET'S CONNECT" step={48} />
         </h2>
         <div className="footer-links mono">
-          <a href="mailto:hi@example.com">
+          <a href={`mailto:${contact.email}`} aria-label={`Email ${contact.email}`}>
             <Scramble text="EMAIL" step={60} />
           </a>
-          <a href="https://github.com" target="_blank" rel="noreferrer">
+          <a href={contact.github} target="_blank" rel="noreferrer" aria-label="GitHub infiniteHY">
             <Scramble text="GITHUB" step={60} />
           </a>
         </div>
       </motion.div>
       <p className="footer-note mono label-3">
-        HANYA©2026 · Typeset in Inspire Mono by Haoqi Wen · Squircles via
-        wasm_design_utils
+        HANYA©2026
       </p>
     </footer>
   );

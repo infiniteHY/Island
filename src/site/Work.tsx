@@ -61,6 +61,7 @@ function WorkPanel({
   return (
     <Tag
       className="work-panel"
+      data-project-id={project.id}
       {...(project.href
         ? { href: project.href, target: "_blank", rel: "noreferrer" }
         : {})}

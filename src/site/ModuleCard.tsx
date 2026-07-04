@@ -19,6 +19,7 @@ export function ModuleCard({ module }: Props) {
 
   return (
     <motion.div
+      id={module.id}
       ref={ref}
       className={`module-card${module.open ? "" : " is-locked"}${expanded ? " is-expanded" : ""}`}
       style={path ? { clipPath: `path("${path}")` } : undefined}

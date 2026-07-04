@@ -32,39 +32,30 @@ export const projectGroups: ProjectGroup[] = [
     projects: [
       {
         id: "mira",
-        title: "MIRA 个人IP经纪人",
+        title: "MIRA",
         year: "2026",
         category: "AGENT",
-        chip: "AI PROJECT",
-        cover: {
-          type: "gradient",
-          css: "linear-gradient(140deg, #5e53e3 0%, #c0434c 100%)",
-          glyph: "◉"
-        }
+        chip: "IP",
+        href: "https://mira-agent.hanya.workers.dev/",
+        cover: { type: "image", src: "/assets/works/mira.png" }
       },
       {
-        id: "etf-agent",
-        title: "ETF 智能投资 Agent",
+        id: "invest-agent",
+        title: "Invest Agent",
         year: "2026",
         category: "AGENT",
-        chip: "AI PROJECT",
-        cover: {
-          type: "gradient",
-          css: "linear-gradient(150deg, #016630 0%, #05df72 100%)",
-          glyph: "▲"
-        }
+        chip: "INVEST",
+        href: "https://etf-ai-agent.pages.dev/",
+        cover: { type: "image", src: "/assets/works/invest-agent.png" }
       },
       {
         id: "skill-weave",
-        title: "Skill Weave 个人技能树",
+        title: "Skill Weave",
         year: "2026",
         category: "TOOLS",
-        chip: "CODING PROJECT",
-        cover: {
-          type: "gradient",
-          css: "linear-gradient(135deg, #1e69f6 0%, #93ccdc 100%)",
-          glyph: "❋"
-        }
+        chip: "AI Agent",
+        href: "https://skillweave.hanya.workers.dev/",
+        cover: { type: "image", src: "/assets/works/skill-weave.png" }
       }
     ]
   },
@@ -73,40 +64,31 @@ export const projectGroups: ProjectGroup[] = [
     label: "SPACES & WORKSHOPS",
     projects: [
       {
-        id: "baiye",
-        title: "白夜读书会",
-        year: "2025",
+        id: "white-night",
+        title: "WhiteNight",
+        year: "2026",
         category: "READING",
-        chip: "COMMUNITY",
-        cover: {
-          type: "gradient",
-          css: "linear-gradient(160deg, #0f1117 0%, #36364f 60%, #7f7866 100%)",
-          glyph: "☾"
-        }
+        chip: "Website",
+        href: "https://white-night-app.vercel.app/dashboard",
+        cover: { type: "image", src: "/assets/works/white-night.png" }
       },
       {
         id: "wand-jazz",
         title: "Wand Jazz Bar",
-        year: "2025",
+        year: "2026",
         category: "MUSIC",
-        chip: "SPACE",
-        cover: {
-          type: "gradient",
-          css: "linear-gradient(145deg, #2b1b4d 0%, #8a3ffc 55%, #ff7eb6 100%)",
-          glyph: "♪"
-        }
+        chip: "AI Agent",
+        href: "https://wandjazzbar.vercel.app/jazz-bar",
+        cover: { type: "image", src: "/assets/works/wand-jazz-bar.png" }
       },
       {
         id: "mbti-music",
-        title: "MBTI 乐理学习工坊",
-        year: "2025",
+        title: "MBTI Music Theory",
+        year: "2026",
         category: "EDU",
-        chip: "WORKSHOP",
-        cover: {
-          type: "gradient",
-          css: "linear-gradient(140deg, #a36100 0%, #fac800 100%)",
-          glyph: "♭"
-        }
+        chip: "AI Agent",
+        href: "https://musictheory-6sc.pages.dev/#/",
+        cover: { type: "image", src: "/assets/works/music-theory.png" }
       }
     ]
   }
