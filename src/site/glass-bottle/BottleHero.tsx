@@ -6,7 +6,7 @@ import { useSiteStore } from "../siteStore";
 import { BottleScene } from "./BottleScene";
 import { BOTTLE_ITEMS } from "./bottleItems";
 
-const titleLines = ["把喜欢的东西，", "装进一个透明瓶子里。"];
+const titleLines = ["我的世界——", "Reading, Music, Bird."];
 
 export function BottleHero() {
   const reducedMotion = useSiteStore((state) => state.reducedMotion);
