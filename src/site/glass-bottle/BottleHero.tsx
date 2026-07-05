@@ -52,7 +52,7 @@ export function BottleHero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.34, ease: [0.22, 1, 0.36, 1] }}
         >
-          贝斯、相机、技能树、交易实验和小世界会像标本一样落进瓶中。
+          贝斯、地球、相机、望远镜里的鸟和交易实验，会像标本一样落进瓶中。
           <span className="mono label-3">EVERY OBJECT IS A PATH</span>
         </motion.p>
       </div>

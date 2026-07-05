@@ -5,6 +5,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import type { RapierRigidBody } from "@react-three/rapier";
 import type { BottleItemConfig } from "./bottleItems";
+import { BassMini } from "./items/BassMini";
+import { EarthMini } from "./items/EarthMini";
+import { CameraMini } from "./items/CameraMini";
+import { BirdMini } from "./items/BirdMini";
+import { MarketMini } from "./items/MarketMini";
 
 type BottleItemProps = {
   item: BottleItemConfig;
@@ -262,10 +267,10 @@ export function StaticBottleItem({
 function finalPositionFor(id: string): [number, number, number] {
   const positions: Record<string, [number, number, number]> = {
     bass: [-0.28, -1.76, 0.05],
+    earth: [0.48, -1.62, -0.1],
     camera: [0.24, -1.68, 0.12],
-    skill: [0.48, -1.62, -0.1],
-    market: [-0.02, -1.52, 0.2],
-    world: [-0.42, -1.64, -0.16]
+    bird: [-0.02, -1.52, 0.2],
+    market: [-0.42, -1.64, -0.16]
   };
   return positions[id] ?? [0, -1.4, 0];
 }
@@ -273,101 +278,16 @@ function finalPositionFor(id: string): [number, number, number] {
 function ItemMesh({ item, active }: { item: BottleItemConfig; active: boolean }) {
   switch (item.id) {
     case "bass":
-      return <BassToy item={item} active={active} />;
+      return <BassMini item={item} active={active} />;
+    case "earth":
+      return <EarthMini item={item} active={active} />;
     case "camera":
-      return <CameraToy item={item} active={active} />;
-    case "skill":
-      return <SkillToy item={item} active={active} />;
+      return <CameraMini item={item} active={active} />;
+    case "bird":
+      return <BirdMini item={item} active={active} />;
     case "market":
-      return <MarketToy item={item} active={active} />;
-    case "world":
-      return <WorldToy item={item} active={active} />;
+      return <MarketMini item={item} active={active} />;
     default:
       return null;
   }
-}
-
-function BassToy({ item, active }: { item: BottleItemConfig; active: boolean }) {
-  return (
-    <group rotation={[0, 0, -0.35]}>
-      <mesh position={[0, -0.08, 0]}>
-        <boxGeometry args={[0.12, 0.78, 0.08]} />
-        <meshStandardMaterial color={item.body} roughness={0.46} metalness={0.15} emissive={active ? item.accent : "#000000"} emissiveIntensity={active ? 0.18 : 0} />
-      </mesh>
-      <mesh position={[0, -0.43, 0]}>
-        <sphereGeometry args={[0.22, 24, 16]} />
-        <meshStandardMaterial color={item.accent} roughness={0.38} metalness={0.12} />
-      </mesh>
-      <mesh position={[0.02, 0.36, 0.01]}>
-        <boxGeometry args={[0.28, 0.08, 0.09]} />
-        <meshStandardMaterial color="#efdfbd" roughness={0.4} />
-      </mesh>
-    </group>
-  );
-}
-
-function CameraToy({ item, active }: { item: BottleItemConfig; active: boolean }) {
-  return (
-    <group>
-      <mesh>
-        <boxGeometry args={[0.58, 0.34, 0.16]} />
-        <meshStandardMaterial color={item.body} roughness={0.42} metalness={0.2} emissive={active ? item.accent : "#000000"} emissiveIntensity={active ? 0.12 : 0} />
-      </mesh>
-      <mesh position={[0, 0, 0.11]} rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[0.14, 0.17, 0.12, 32]} />
-        <meshStandardMaterial color={item.accent} roughness={0.28} metalness={0.35} />
-      </mesh>
-      <mesh position={[-0.18, 0.21, 0]}>
-        <boxGeometry args={[0.18, 0.08, 0.14]} />
-        <meshStandardMaterial color="#e8e1d0" roughness={0.45} />
-      </mesh>
-    </group>
-  );
-}
-
-function SkillToy({ item, active }: { item: BottleItemConfig; active: boolean }) {
-  return (
-    <group rotation={[0, 0, 0.25]}>
-      <mesh>
-        <octahedronGeometry args={[0.27, 1]} />
-        <meshStandardMaterial color={item.accent} roughness={0.55} metalness={0.05} emissive={active ? item.accent : "#000000"} emissiveIntensity={active ? 0.2 : 0} />
-      </mesh>
-      <mesh position={[0, -0.28, 0]}>
-        <boxGeometry args={[0.08, 0.36, 0.08]} />
-        <meshStandardMaterial color={item.body} roughness={0.6} />
-      </mesh>
-    </group>
-  );
-}
-
-function MarketToy({ item, active }: { item: BottleItemConfig; active: boolean }) {
-  return (
-    <group>
-      <mesh>
-        <boxGeometry args={[0.54, 0.34, 0.08]} />
-        <meshStandardMaterial color={item.body} roughness={0.5} metalness={0.08} emissive={active ? item.accent : "#000000"} emissiveIntensity={active ? 0.08 : 0} />
-      </mesh>
-      {[-0.16, -0.02, 0.12, 0.24].map((x, index) => (
-        <mesh key={x} position={[x, -0.08 + index * 0.04, 0.055]}>
-          <boxGeometry args={[0.045, 0.12 + index * 0.035, 0.018]} />
-          <meshBasicMaterial color={index % 2 === 0 ? item.accent : "#ff6d65"} />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-function WorldToy({ item, active }: { item: BottleItemConfig; active: boolean }) {
-  return (
-    <group>
-      <mesh>
-        <icosahedronGeometry args={[0.24, 1]} />
-        <meshStandardMaterial color={item.body} roughness={0.48} metalness={0.08} emissive={active ? item.accent : "#000000"} emissiveIntensity={active ? 0.2 : 0} />
-      </mesh>
-      <mesh position={[0.17, 0.1, 0.02]}>
-        <sphereGeometry args={[0.08, 16, 12]} />
-        <meshStandardMaterial color={item.accent} roughness={0.4} />
-      </mesh>
-    </group>
-  );
 }
