@@ -79,6 +79,7 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 58px;
 }
 
 body {
@@ -127,9 +128,15 @@ a {
 
 /* ---------- header ---------- */
 
+.site {
+  padding-top: 58px;
+}
+
 .site-header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 50;
   display: flex;
   align-items: center;
@@ -142,6 +149,7 @@ a {
 }
 
 .site-logo {
+  flex: 0 0 auto;
   font-weight: 700;
 }
 
@@ -195,7 +203,7 @@ a {
 
 .hero-title {
   margin: 0;
-  font-size: clamp(2.6rem, 8.5vw, 6.0rem);
+  font-size: clamp(2.4rem, 7.8vw, 5.6rem);
   font-weight: var(--weight-display);
   line-height: 1.04;
   letter-spacing: -0.02em;
@@ -227,12 +235,12 @@ a {
 
 .bottle-hero {
   display: grid;
-  grid-template-columns: minmax(0, 0.92fr) minmax(320px, 1.08fr);
-  gap: clamp(24px, 5vw, 56px);
+  grid-template-columns: minmax(0, 0.94fr) minmax(300px, 1.06fr);
+  gap: clamp(18px, 4vw, 48px);
   align-items: center;
   min-height: calc(100svh - 58px);
-  padding-top: clamp(48px, 8vh, 96px);
-  padding-bottom: clamp(24px, 6vh, 72px);
+  padding-top: clamp(28px, 5vh, 56px);
+  padding-bottom: clamp(16px, 3vh, 32px);
   overflow: hidden;
 }
 
@@ -278,8 +286,8 @@ a {
 .bottle-stage {
   position: relative;
   z-index: 1;
-  width: min(100%, 620px);
-  height: clamp(500px, 68vh, 760px);
+  width: min(100%, 560px);
+  height: clamp(350px, 56svh, 560px);
   justify-self: center;
 }
 
@@ -299,7 +307,7 @@ a {
 }
 
 .bottle-stage::after {
-  content: "";
+  content: none;
   position: absolute;
   inset: 6% 16% 9%;
   pointer-events: none;
@@ -363,8 +371,8 @@ a {
 
 .bottle-nav a {
   display: block;
-  min-height: 74px;
-  padding: 14px 16px;
+  min-height: 62px;
+  padding: 12px 14px;
   background: rgba(var(--bg-deep), 0.88);
   transition:
     background-color 180ms ease-out,
@@ -795,7 +803,7 @@ a.work-panel:hover .work-title {
   grid-template-columns: minmax(0, 1fr) minmax(380px, 520px);
   align-items: center;
   gap: clamp(44px, 6vw, 88px);
-  padding: clamp(80px, 16vh, 180px) var(--gutter);
+  padding: clamp(48px, 8vh, 88px) var(--gutter) clamp(36px, 6vh, 64px);
   border-top: 1px var(--rule-style) var(--line);
 }
 
@@ -1026,24 +1034,25 @@ a.work-panel:hover .work-title {
 /* ---------- footer ---------- */
 
 .site-footer {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px;
-  padding: clamp(48px, 10vh, 96px) var(--gutter) 40px;
+  position: relative;
+  min-height: clamp(190px, 24vh, 240px);
+  padding: 28px var(--gutter) 24px;
   border-top: 1px var(--rule-style) var(--line);
 }
 
 .footer-inner {
+  position: absolute;
+  left: var(--gutter);
+  bottom: 34px;
   display: flex;
   flex-direction: column;
   gap: 18px;
+  max-width: min(520px, calc(100% - var(--gutter) * 2));
 }
 
 .footer-title {
   margin: 0;
-  font-size: clamp(1.4rem, 3vw, 2.4rem);
+  font-size: clamp(1.25rem, 2.4vw, 1.9rem);
   font-weight: 700;
   letter-spacing: 0.04em;
   color: var(--label-1);
@@ -1063,27 +1072,79 @@ a.work-panel:hover .work-title {
   color: var(--accent);
 }
 
-.footer-note {
-  margin: 0;
+.footer-profile {
+  position: absolute;
+  right: var(--gutter);
+  bottom: 24px;
+  display: grid;
+  grid-template-columns: minmax(160px, 250px) clamp(82px, 8vw, 108px);
+  align-items: end;
+  gap: 18px;
+  max-width: min(440px, calc(100vw - var(--gutter) * 2));
+  padding-bottom: 0;
+  text-align: right;
 }
 
-.footer-note a {
-  color: inherit;
-  text-decoration: none;
-  transition: color 150ms ease-out;
+.footer-profile-copy {
+  padding-bottom: 8px;
 }
 
-.footer-note a:hover {
+.footer-profile-copy p {
+  margin: 0 0 10px;
+}
+
+.footer-profile-copy strong,
+.footer-profile-copy span {
+  display: block;
+}
+
+.footer-profile-copy strong {
+  color: var(--label-1);
+  font-size: clamp(1rem, 1.25vw, 1.16rem);
+  line-height: 1.15;
+}
+
+.footer-profile-copy span {
+  margin-top: 10px;
+  color: var(--label-2);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.footer-profile img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border: 1px solid rgba(var(--label-d), 0.12);
+  border-radius: 8px;
+  box-shadow:
+    0 22px 60px rgba(0, 0, 0, 0.18),
+    7px 7px 0 rgba(var(--accent-rgb), 0.12);
+}
+
+.footer-links a:hover {
   color: var(--accent);
 }
 
 /* ---------- responsive ---------- */
 
 @media (max-width: 1024px) {
+  .hero-title {
+    font-size: clamp(2.1rem, 6vw, 3.8rem);
+  }
+
+  .hero-intro {
+    margin-top: 18px;
+    line-height: 1.65;
+  }
+
   .bottle-hero {
-    grid-template-columns: 1fr;
-    gap: 20px;
-    min-height: auto;
+    grid-template-columns: minmax(0, 0.94fr) minmax(280px, 1.06fr);
+    gap: 18px;
+    min-height: calc(100svh - 58px);
+    padding-top: 24px;
+    padding-bottom: 8px;
   }
 
   .bottle-hero-copy {
@@ -1095,8 +1156,8 @@ a.work-panel:hover .work-title {
   }
 
   .bottle-stage {
-    width: min(100%, 560px);
-    height: clamp(420px, 58vh, 620px);
+    width: min(100%, 430px);
+    height: clamp(300px, 46svh, 390px);
   }
 
   .bottle-nav {
@@ -1112,6 +1173,7 @@ a.work-panel:hover .work-title {
   .cta {
     grid-template-columns: 1fr;
     align-items: start;
+    padding-block: 56px 40px;
   }
 
   .hud-pointer {
@@ -1119,7 +1181,27 @@ a.work-panel:hover .work-title {
   }
 }
 
+@media (max-width: 760px) {
+  .bottle-hero {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    min-height: auto;
+  }
+}
+
 @media (max-width: 640px) {
+  .site {
+    padding-top: 54px;
+  }
+
+  html {
+    scroll-padding-top: 54px;
+  }
+
+  .site-header {
+    padding-block: 12px;
+  }
+
   .bottle-hero {
     padding-top: 40px;
     padding-bottom: 28px;
@@ -1131,6 +1213,7 @@ a.work-panel:hover .work-title {
   }
 
   .bottle-stage {
+    width: min(100%, 390px);
     height: min(62vh, 500px);
     min-height: 390px;
   }
@@ -1146,8 +1229,8 @@ a.work-panel:hover .work-title {
   }
 
   .bottle-nav a {
-    min-height: 68px;
-    padding: 12px 14px;
+    min-height: 58px;
+    padding: 10px 12px;
   }
 
   .module-grid {
@@ -1180,6 +1263,34 @@ a.work-panel:hover .work-title {
 
   .site-nav {
     display: none;
+  }
+
+  .site-footer {
+    min-height: 360px;
+    padding-bottom: 36px;
+  }
+
+  .footer-inner {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    margin-top: 72px;
+    margin-bottom: 36px;
+  }
+
+  .footer-profile {
+    right: var(--gutter);
+    bottom: 36px;
+    grid-template-columns: minmax(0, 1fr) 86px;
+    width: 100%;
+    max-width: 390px;
+    text-align: left;
+    gap: 14px;
+    padding-bottom: 0;
+  }
+
+  .footer-profile-copy span {
+    font-size: 0.78rem;
   }
 }
 
@@ -1293,6 +1404,14 @@ button:hover .key-hint {
 .site > *:not(.atmosphere):not(.crosshair) {
   position: relative;
   z-index: 1;
+}
+
+.site > header.site-header.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 80;
 }
 
 /* 十字准星光标 */

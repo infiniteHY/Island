@@ -65,7 +65,7 @@ export const projectGroups: ProjectGroup[] = [
     projects: [
       {
         id: "white-night",
-        title: "WhiteNight",
+        title: "White Night",
         year: "2026",
         category: "READING",
         chip: "Website",

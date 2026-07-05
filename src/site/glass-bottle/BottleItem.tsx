@@ -1,6 +1,8 @@
 import { Html } from "@react-three/drei";
 import { RigidBody } from "@react-three/rapier";
-import { useEffect, useRef, useState } from "react";
+import gsap from "gsap";
+import { useEffect, useMemo, useRef, useState } from "react";
+import * as THREE from "three";
 import type { RapierRigidBody } from "@react-three/rapier";
 import type { BottleItemConfig } from "./bottleItems";
 
@@ -12,43 +14,89 @@ type BottleItemProps = {
   delay: number;
 };
 
+type DropPhase = "waiting" | "dropping" | "settled";
+
 export function BottleItem({ item, activeId, onActiveChange, reducedMotion, delay }: BottleItemProps) {
   const bodyRef = useRef<RapierRigidBody>(null);
+  const modelRef = useRef<THREE.Group>(null);
+  const dropRef = useRef<THREE.Group>(null);
   const draggingRef = useRef(false);
   const movedRef = useRef(false);
   const lastPointerRef = useRef<{ x: number; y: number } | null>(null);
   const [hovered, setHovered] = useState(false);
-  const [released, setReleased] = useState(reducedMotion);
+  const [phase, setPhase] = useState<DropPhase>(reducedMotion ? "settled" : "waiting");
   const active = activeId === item.id || hovered;
-  const position = reducedMotion ? finalPositionFor(item.id) : item.startPosition;
+  const finalPosition = useMemo(() => finalPositionFor(item.id), [item.id]);
 
   useEffect(() => {
     if (reducedMotion) {
-      setReleased(true);
+      setPhase("settled");
       return undefined;
     }
 
-    setReleased(false);
-    const timer = window.setTimeout(() => setReleased(true), delay);
-    return () => window.clearTimeout(timer);
+    setPhase("waiting");
+    const release = gsap.delayedCall(delay / 1000, () => setPhase("dropping"));
+    return () => {
+      release.kill();
+    };
   }, [delay, reducedMotion]);
 
   useEffect(() => {
-    if (reducedMotion || !released) return undefined;
+    if (phase !== "dropping") return undefined;
 
-    const timer = window.setTimeout(() => {
+    const group = dropRef.current;
+    if (!group) return undefined;
+
+    const [fx, fy, fz] = finalPosition;
+    const neckX = item.startPosition[0] * 0.18;
+    const ctx = gsap.context(() => {
+      const timeline = gsap.timeline({
+        onComplete: () => setPhase("settled")
+      });
+
+      timeline
+        .set(group.position, { x: item.startPosition[0], y: item.startPosition[1], z: item.startPosition[2] })
+        .set(group.scale, { x: item.scale * 0.16, y: item.scale * 0.16, z: item.scale * 0.16 })
+        .set(group.rotation, {
+          x: item.rotation[0],
+          y: item.rotation[1],
+          z: item.rotation[2] + item.startPosition[0] * 0.3
+        })
+        .to(group.scale, { x: item.scale, y: item.scale, z: item.scale, duration: 0.35, ease: "back.out(2)" }, 0)
+        .to(group.position, { x: neckX, y: 2.28, z: item.startPosition[2] * 0.5, duration: 0.62, ease: "power2.in" }, 0)
+        .to(group.rotation, { z: item.rotation[2] + Math.PI * 0.42, duration: 0.62, ease: "power2.in" }, 0)
+        .to(group.position, { x: fx, y: fy, z: fz, duration: 1.05, ease: "bounce.out" })
+        .to(group.rotation, { x: item.rotation[0] + 0.2, y: item.rotation[1] - 0.18, z: item.rotation[2] - 0.16, duration: 1.05, ease: "power3.out" }, "<");
+    }, group);
+
+    return () => ctx.revert();
+  }, [finalPosition, item.rotation, item.scale, item.startPosition, phase]);
+
+  useEffect(() => {
+    if (phase !== "settled" || reducedMotion) return undefined;
+
+    const settle = gsap.delayedCall(0.06, () => {
       const body = bodyRef.current;
-      if (!body || draggingRef.current) return;
+      const model = modelRef.current;
+      if (!body) return;
 
-      const [x, y, z] = finalPositionFor(item.id);
-      body.setTranslation({ x, y, z }, true);
+      body.setGravityScale(0.12, true);
       body.setLinvel({ x: 0, y: 0, z: 0 }, true);
       body.setAngvel({ x: 0, y: 0, z: 0 }, true);
-      body.setGravityScale(0.12, true);
-    }, 6800 - delay);
 
-    return () => window.clearTimeout(timer);
-  }, [delay, item.id, reducedMotion, released]);
+      if (model) {
+        gsap.fromTo(
+          model.scale,
+          { x: item.scale * 0.96, y: item.scale * 0.96, z: item.scale * 0.96 },
+          { x: item.scale, y: item.scale, z: item.scale, duration: 0.32, ease: "power2.out" }
+        );
+      }
+    });
+
+    return () => {
+      settle.kill();
+    };
+  }, [item.scale, phase, reducedMotion]);
 
   useEffect(() => {
     const stopDragging = () => {
@@ -66,14 +114,22 @@ export function BottleItem({ item, activeId, onActiveChange, reducedMotion, dela
     };
   }, [hovered]);
 
-  if (!released) return null;
+  if (phase === "waiting") return null;
+
+  if (phase === "dropping") {
+    return (
+      <group ref={dropRef}>
+        <ItemMesh item={item} active={false} />
+      </group>
+    );
+  }
 
   return (
     <RigidBody
       ref={bodyRef}
       type={reducedMotion ? "fixed" : "dynamic"}
       colliders="cuboid"
-      position={position}
+      position={finalPosition}
       rotation={item.rotation}
       restitution={0.14}
       friction={0.82}
@@ -84,6 +140,7 @@ export function BottleItem({ item, activeId, onActiveChange, reducedMotion, dela
       enabledRotations={[true, true, true]}
     >
       <group
+        ref={modelRef}
         scale={item.scale}
         onPointerEnter={(event) => {
           event.stopPropagation();

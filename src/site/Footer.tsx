@@ -6,6 +6,7 @@ const contact = {
   email: "1277530323@qq.com",
   github: "https://github.com/infiniteHY"
 };
+const mePhoto = new URL("../../docs/me.jpg", import.meta.url).href;
 
 export function Footer() {
   const reducedMotion = useSiteStore((state) => state.reducedMotion);
@@ -31,9 +32,21 @@ export function Footer() {
           </a>
         </div>
       </motion.div>
-      <p className="footer-note mono label-3">
-        HANYA©2026
-      </p>
+      <motion.aside
+        className="footer-profile"
+        initial={reducedMotion ? false : { opacity: 0, y: 18 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.7, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+        aria-label="个人介绍"
+      >
+        <div className="footer-profile-copy">
+          <p className="mono label-3">PROFILE.NODE</p>
+          <strong>Computer Vision Engineer</strong>
+          <span>Building perception systems, playful tools, and personal worlds.</span>
+        </div>
+        <img src={mePhoto} alt="Hanya portrait" />
+      </motion.aside>
     </footer>
   );
 }
