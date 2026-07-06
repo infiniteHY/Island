@@ -3,89 +3,109 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import type { MiniProps } from "./BassMini";
 
-/**
- * 桌面地球仪微缩：海洋球体 + 程序化大陆块 + 23.5° 倾斜轴
- * + 弧形支架 + 圆底座；active 时缓慢自转。
- */
+type LandPatch = {
+  lon: number;
+  lat: number;
+  scale: [number, number, number];
+  color?: string;
+};
+
+function surfacePoint(lon: number, lat: number, radius: number) {
+  return new THREE.Vector3(
+    radius * Math.cos(lat) * Math.sin(lon),
+    radius * Math.sin(lat),
+    radius * Math.cos(lat) * Math.cos(lon)
+  );
+}
+
+function LandMass({ patch }: { patch: LandPatch }) {
+  const radius = 0.264;
+  const position = surfacePoint(patch.lon, patch.lat, radius);
+  const normal = position.clone().normalize();
+  const quaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), normal);
+
+  return (
+    <mesh position={position} quaternion={quaternion} scale={patch.scale} castShadow>
+      <sphereGeometry args={[1, 14, 10]} />
+      <meshStandardMaterial color={patch.color ?? "#7fa96b"} roughness={0.7} metalness={0.02} />
+    </mesh>
+  );
+}
+
+/** A palm-size planet miniature: raised land, polar paint, and a glossy clear coat. */
 export function EarthMini({ item, active }: MiniProps) {
   const globeRef = useRef<THREE.Group>(null);
 
   useFrame((_, delta) => {
     if (!globeRef.current) return;
-    globeRef.current.rotation.y += delta * (active ? 0.9 : 0.12);
+    globeRef.current.rotation.y += delta * (active ? 0.82 : 0.1);
   });
 
-  // 简化大陆：贴着球面摆放的一组扁球体块
-  const continents = useMemo(
-    () =>
-      [
-        // [经度, 纬度, 尺寸x, 尺寸y]
-        [0.3, 0.5, 0.13, 0.1], // 亚欧
-        [1.5, 0.15, 0.1, 0.13], // 非洲
-        [-1.6, 0.45, 0.09, 0.08], // 北美
-        [-1.3, -0.5, 0.06, 0.1], // 南美
-        [2.6, -0.55, 0.08, 0.05], // 澳洲
-        [0.9, 0.95, 0.07, 0.04] // 北极圈碎块
-      ].map(([lon, lat, sx, sy]) => {
-        const r = 0.215;
-        const x = r * Math.cos(lat) * Math.sin(lon);
-        const y = r * Math.sin(lat);
-        const z = r * Math.cos(lat) * Math.cos(lon);
-        return { position: [x, y, z] as [number, number, number], scale: [sx, sy, 0.03] as [number, number, number] };
-      }),
+  const land = useMemo<LandPatch[]>(
+    () => [
+      { lon: -1.95, lat: 0.62, scale: [0.075, 0.045, 0.018] },
+      { lon: -1.64, lat: 0.36, scale: [0.064, 0.052, 0.018] },
+      { lon: -1.28, lat: -0.36, scale: [0.05, 0.088, 0.017] },
+      { lon: -1.0, lat: -0.82, scale: [0.035, 0.052, 0.014] },
+      { lon: 0.02, lat: 0.55, scale: [0.118, 0.05, 0.018] },
+      { lon: 0.48, lat: 0.44, scale: [0.108, 0.044, 0.018] },
+      { lon: 0.73, lat: 0.05, scale: [0.06, 0.088, 0.018] },
+      { lon: 1.14, lat: -0.26, scale: [0.045, 0.07, 0.016] },
+      { lon: 1.88, lat: 0.1, scale: [0.074, 0.052, 0.017] },
+      { lon: 2.54, lat: -0.5, scale: [0.06, 0.034, 0.014], color: "#8eb06c" },
+      { lon: 2.85, lat: -0.82, scale: [0.03, 0.022, 0.012], color: "#8eb06c" }
+    ],
     []
   );
 
   return (
-    <group>
-      {/* 倾斜的地球组 */}
-      <group rotation={[0, 0, -0.41]} position={[0, 0.08, 0]}>
-        <group ref={globeRef}>
-          {/* 海洋 */}
-          <mesh>
-            <sphereGeometry args={[0.215, 28, 20]} />
-            <meshStandardMaterial
-              color={item.body}
-              roughness={0.42}
-              metalness={0.05}
-              emissive={active ? item.accent : "#000000"}
-              emissiveIntensity={active ? 0.12 : 0}
-            />
-          </mesh>
-          {/* 大陆块：法线朝外的扁球 */}
-          {continents.map((c, i) => (
-            <mesh
-              key={i}
-              position={c.position}
-              scale={c.scale}
-              onUpdate={(mesh) => mesh.lookAt(0, 0, 0)}
-            >
-              <sphereGeometry args={[1, 10, 8]} />
-              <meshStandardMaterial color="#8fbf7a" roughness={0.55} />
-            </mesh>
-          ))}
-        </group>
-        {/* 南北极轴杆 */}
+    <group ref={globeRef} rotation={[0.18, 0, -0.28]}>
+      <mesh castShadow receiveShadow>
+        <sphereGeometry args={[0.258, 48, 32]} />
+        <meshPhysicalMaterial
+          color={item.body}
+          roughness={0.34}
+          metalness={0.02}
+          clearcoat={0.65}
+          clearcoatRoughness={0.18}
+          emissive={active ? item.accent : "#000000"}
+          emissiveIntensity={active ? 0.08 : 0}
+        />
+      </mesh>
+
+      {land.map((patch, index) => (
+        <LandMass key={index} patch={patch} />
+      ))}
+
+      <mesh position={surfacePoint(0, 1.42, 0.266)} scale={[0.065, 0.065, 0.012]}>
+        <sphereGeometry args={[1, 18, 10]} />
+        <meshStandardMaterial color="#edf8ff" roughness={0.45} />
+      </mesh>
+      <mesh position={surfacePoint(0, -1.38, 0.266)} scale={[0.075, 0.075, 0.012]}>
+        <sphereGeometry args={[1, 18, 10]} />
+        <meshStandardMaterial color="#edf8ff" roughness={0.45} />
+      </mesh>
+
+      <mesh>
+        <sphereGeometry args={[0.268, 48, 32]} />
+        <meshPhysicalMaterial
+          color="#ffffff"
+          transparent
+          opacity={0.12}
+          roughness={0.05}
+          metalness={0}
+          clearcoat={1}
+          clearcoatRoughness={0.04}
+          depthWrite={false}
+        />
+      </mesh>
+
+      {active ? (
         <mesh>
-          <cylinderGeometry args={[0.008, 0.008, 0.52, 8]} />
-          <meshStandardMaterial color="#b9a06a" roughness={0.3} metalness={0.7} />
+          <sphereGeometry args={[0.287, 48, 32]} />
+          <meshBasicMaterial color={item.accent} transparent opacity={0.08} depthWrite={false} />
         </mesh>
-        {/* 弧形支架：半圆环 */}
-        <mesh rotation={[0, Math.PI / 2, 0]}>
-          <torusGeometry args={[0.26, 0.012, 8, 24, Math.PI]} />
-          <meshStandardMaterial color="#b9a06a" roughness={0.3} metalness={0.7} />
-        </mesh>
-      </group>
-      {/* 支架立柱 */}
-      <mesh position={[0.1, -0.2, 0]} rotation={[0, 0, -0.41]}>
-        <cylinderGeometry args={[0.014, 0.02, 0.16, 10]} />
-        <meshStandardMaterial color="#b9a06a" roughness={0.3} metalness={0.7} />
-      </mesh>
-      {/* 底座 */}
-      <mesh position={[0.12, -0.3, 0]}>
-        <cylinderGeometry args={[0.12, 0.14, 0.035, 20]} />
-        <meshStandardMaterial color="#5a4632" roughness={0.4} metalness={0.15} />
-      </mesh>
+      ) : null}
     </group>
   );
 }

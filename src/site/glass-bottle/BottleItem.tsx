@@ -9,7 +9,8 @@ import { BassMini } from "./items/BassMini";
 import { EarthMini } from "./items/EarthMini";
 import { CameraMini } from "./items/CameraMini";
 import { BirdMini } from "./items/BirdMini";
-import { MarketMini } from "./items/MarketMini";
+import { DumbbellMini } from "./items/DumbbellMini";
+import { BookMini } from "./items/BookMini";
 
 type BottleItemProps = {
   item: BottleItemConfig;
@@ -195,7 +196,6 @@ export function BottleItem({ item, activeId, onActiveChange, reducedMotion, dela
         }}
         onClick={(event) => {
           event.stopPropagation();
-          if (!movedRef.current) window.location.hash = item.route.replace("#", "");
           movedRef.current = false;
       }}
     >
@@ -246,7 +246,6 @@ export function StaticBottleItem({
       }}
       onClick={(event) => {
         event.stopPropagation();
-        window.location.hash = item.route.replace("#", "");
       }}
     >
       <group renderOrder={20}>
@@ -266,11 +265,12 @@ export function StaticBottleItem({
 
 function finalPositionFor(id: string): [number, number, number] {
   const positions: Record<string, [number, number, number]> = {
-    bass: [-0.28, -1.76, 0.05],
-    earth: [0.48, -1.62, -0.1],
-    camera: [0.24, -1.68, 0.12],
-    bird: [-0.02, -1.52, 0.2],
-    market: [-0.42, -1.64, -0.16]
+    bass: [-0.36, -1.66, 0.04],
+    book: [-0.5, -1.52, 0.22],
+    earth: [0.44, -1.58, -0.1],
+    camera: [0.2, -1.7, 0.12],
+    bird: [-0.02, -1.48, 0.2],
+    dumbbell: [0.34, -1.6, 0.0]
   };
   return positions[id] ?? [0, -1.4, 0];
 }
@@ -285,8 +285,10 @@ function ItemMesh({ item, active }: { item: BottleItemConfig; active: boolean })
       return <CameraMini item={item} active={active} />;
     case "bird":
       return <BirdMini item={item} active={active} />;
-    case "market":
-      return <MarketMini item={item} active={active} />;
+    case "dumbbell":
+      return <DumbbellMini item={item} active={active} />;
+    case "book":
+      return <BookMini item={item} active={active} />;
     default:
       return null;
   }

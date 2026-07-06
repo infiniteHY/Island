@@ -1,4 +1,4 @@
-export type BottleItemId = "bass" | "earth" | "camera" | "bird" | "market";
+export type BottleItemId = "bass" | "earth" | "camera" | "bird" | "dumbbell" | "book";
 
 export type BottleItemConfig = {
   id: BottleItemId;
@@ -19,15 +19,26 @@ export const BOTTLE_ITEMS: BottleItemConfig[] = [
     subtitle: "Jazz bar / music theory",
     route: "#work",
     startPosition: [-0.22, 3.5, 0.06],
-    rotation: [0.1, 0.25, -0.38],
-    scale: 0.94,
+    rotation: [0.08, 0.2, -0.5],
+    scale: 0.82,
     accent: "#d6a75d",
-    body: "#3a2b20"
+    body: "#15191e"
+  },
+  {
+    id: "book",
+    label: "Book",
+    subtitle: "Reading notes",
+    route: "#work",
+    startPosition: [-0.36, 3.82, -0.08],
+    rotation: [0.18, -0.18, 0.32],
+    scale: 1.02,
+    accent: "#f4e3b0",
+    body: "#6b2f35"
   },
   {
     id: "earth",
     label: "Earth",
-    subtitle: "Places / little world",
+    subtitle: "Little blue planet",
     route: "#room",
     startPosition: [0.18, 4.05, 0.12],
     rotation: [0.2, -0.2, 0.2],
@@ -58,14 +69,14 @@ export const BOTTLE_ITEMS: BottleItemConfig[] = [
     body: "#3e423b"
   },
   {
-    id: "market",
-    label: "Market",
-    subtitle: "ETF notes / trading lab",
+    id: "dumbbell",
+    label: "Dumbbell",
+    subtitle: "Training log",
     route: "#work",
     startPosition: [0.08, 5.45, -0.16],
-    rotation: [0.28, 0.32, 0.16],
-    scale: 0.82,
-    accent: "#477fe8",
-    body: "#141a22"
+    rotation: [0.4, 0.22, 0.36],
+    scale: 0.88,
+    accent: "#9aa3ad",
+    body: "#25282d"
   }
 ];

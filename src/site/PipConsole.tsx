@@ -2,6 +2,16 @@ import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useSiteStore } from "./siteStore";
 
 type PipMood = "idle" | "happy" | "confused" | "flying";
+type TerminalLine = {
+  type: "boot" | "prompt" | "output" | "error" | "success";
+  text: string;
+};
+
+type PipStats = {
+  energy: number;
+  focus: number;
+  curiosity: number;
+};
 
 type PipProject = {
   key: string;
@@ -93,12 +103,14 @@ const secrets = [
 ];
 
 function normalize(value: string) {
-  return value.trim().toLowerCase().replace(/\s+/g, "");
+  return value.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
 function findProject(value: string) {
   const key = normalize(value);
-  return projects.find((project) => project.key === key || project.aliases.includes(key));
+  return projects.find((project) =>
+    [project.key, project.name, project.id, ...project.aliases].some((alias) => normalize(alias) === key)
+  );
 }
 
 function scanProjects() {
@@ -130,10 +142,13 @@ export function PipConsole() {
   const [input, setInput] = useState("");
   const [mood, setMood] = useState<PipMood>("idle");
   const [nest, setNest] = useState<string[]>(["curiosity"]);
-  const [lines, setLines] = useState<string[]>([
-    "Pip Console v0.2",
-    "type \"help\" to begin.",
-    "try: scan / list / hatch / brew music+code"
+  const [showNest, setShowNest] = useState(false);
+  const [stats, setStats] = useState<PipStats>({ energy: 80, focus: 70, curiosity: 62 });
+  const [lines, setLines] = useState<TerminalLine[]>([
+    { type: "boot", text: "PipOS v0.2.6 booting..." },
+    { type: "success", text: "mounted /home/hanya/projects" },
+    { type: "output", text: "type `help` to begin" },
+    { type: "output", text: "try: scan | list | hatch | brew music+code" }
   ]);
   const prompt = "pip@home:~$";
 
@@ -150,13 +165,36 @@ export function PipConsole() {
     log.scrollTop = log.scrollHeight;
   }, [lines]);
 
-  function pulse(nextMood: PipMood) {
+  function meter(value: number) {
+    const filled = Math.max(0, Math.min(10, Math.round(value / 10)));
+    return "█".repeat(filled) + "░".repeat(10 - filled);
+  }
+
+  function updateStats(delta: Partial<PipStats>) {
+    setStats((current) => ({
+      energy: Math.max(0, Math.min(100, current.energy + (delta.energy ?? 0))),
+      focus: Math.max(0, Math.min(100, current.focus + (delta.focus ?? 0))),
+      curiosity: Math.max(0, Math.min(100, current.curiosity + (delta.curiosity ?? 0)))
+    }));
+  }
+
+  function pulse(nextMood: PipMood, delta: Partial<PipStats> = {}) {
+    updateStats(delta);
     setMood(nextMood);
     window.setTimeout(() => setMood("idle"), nextMood === "flying" ? 760 : 440);
   }
 
   function echo(command: string, output: string[]) {
-    setLines((current) => [...current, `${prompt} ${command}`, ...output].slice(-36));
+    const mapped = output.map<TerminalLine>((text) => ({
+      type: (text.includes("unknown") || text.startsWith("try:")
+        ? "error"
+        : text.includes("unlocked") || text.includes("opening")
+          ? "success"
+          : "output") as TerminalLine["type"],
+      text
+    }));
+    const promptLine: TerminalLine = { type: "prompt", text: `${prompt} ${command}` };
+    setLines((current) => [...current, promptLine, ...mapped].slice(-42));
   }
 
   function addNestItem(item: string) {
@@ -164,6 +202,18 @@ export function PipConsole() {
       if (current.includes(item)) return current;
       return [...current, item].slice(-7);
     });
+  }
+
+  function renderLine(text: string) {
+    if (/^https?:\/\//.test(text)) {
+      return (
+        <a href={text} target="_blank" rel="noreferrer">
+          {text}
+        </a>
+      );
+    }
+
+    return text || "\u00a0";
   }
 
   function setTheme(next: "light" | "dark") {
@@ -180,8 +230,9 @@ export function PipConsole() {
     const target = rest.toLowerCase();
 
     if (command === "clear") {
-      setLines(["Pip Console cleared.", "type \"help\" to begin."]);
-      pulse("happy");
+      setLines([{ type: "boot", text: "screen cleared." }, { type: "output", text: "type `help` to begin." }]);
+      setShowNest(false);
+      pulse("happy", { focus: 4 });
       return;
     }
 
@@ -192,37 +243,41 @@ export function PipConsole() {
         "scan                 highlight every project card",
         "focus <project>      jump to one project card",
         "open <project>       open project link",
+        "status               show Pip mood and factors",
         "brew a+b             combine two interests",
         "nest                 show collected relics",
-        "drop <relic>         add bass/camera/market/music/skill",
+        "drop <relic>         add bass/camera/market/music/skill/note",
         "hatch                hatch the current nest",
         "theme night/light    switch theme",
         "where                show page map",
+        "goto top/work/room/contact",
         "contact              show email and GitHub",
         "secret               unlock a hidden note",
         "sing                 make Pip hum",
         "fortune              ask Pip for a small prompt",
         "clear                clear terminal"
       ]);
-      pulse("happy");
+      pulse("happy", { curiosity: 2 });
       return;
     }
 
     if (command === "status") {
+      setShowNest(true);
       echo(value, [
         "Pip the Terminal Bird",
         `mood       ${moodLabel}`,
-        "energy     ████████░░ 80%",
-        "focus      ███████░░░ 70%",
+        `energy     ${meter(stats.energy)} ${stats.energy}%`,
+        `focus      ${meter(stats.focus)} ${stats.focus}%`,
+        `curiosity  ${meter(stats.curiosity)} ${stats.curiosity}%`,
         `nest       ${nest.join(" / ")}`
       ]);
-      pulse("happy");
+      pulse("happy", { focus: 1 });
       return;
     }
 
     if (command === "list" || command === "projects") {
       echo(value, projects.map((project, index) => `[${index + 1}] ${project.key.padEnd(10)} ${project.name}`));
-      pulse("happy");
+      pulse("happy", { focus: 3 });
       return;
     }
 
@@ -232,7 +287,7 @@ export function PipConsole() {
         ...projects.map((project, index) => `[${index + 1}] ${project.name} - ${project.desc}`)
       ]);
       scanProjects();
-      pulse("flying");
+      pulse("flying", { energy: -8, focus: 8, curiosity: 3 });
       return;
     }
 
@@ -240,27 +295,26 @@ export function PipConsole() {
       const project = findProject(rest);
       if (!project) {
         echo(value, ["unknown project.", "try: focus mira / focus skillweave / focus mbti"]);
-        pulse("confused");
+        pulse("confused", { energy: -2, focus: -4 });
         return;
       }
 
       echo(value, [`Pip points to ${project.name}.`, project.desc]);
       focusProject(project.id);
-      pulse("flying");
+      pulse("flying", { energy: -4, focus: 7 });
       return;
     }
 
     if (command === "open") {
       const project = findProject(rest);
       if (!project) {
-        echo(value, ["unknown project.", "try: open mira / open invest / open jazz / open mbti"]);
-        pulse("confused");
+        echo(value, ["unknown project.", "try: open mira / open invest agent / open wand jazz bar / open mbti"]);
+        pulse("confused", { energy: -2, focus: -4 });
         return;
       }
 
-      echo(value, [`Pip flies to ${project.name}...`, "opening project."]);
-      focusProject(project.id);
-      pulse("flying");
+      echo(value, [`opening ${project.name}`, project.url]);
+      pulse("flying", { energy: -5, focus: 4 });
       window.open(project.url, "_blank", "noopener,noreferrer");
       return;
     }
@@ -273,13 +327,14 @@ export function PipConsole() {
           "Pip tilts its head.",
           "try: brew music+code / brew cv+steel / brew camera+memory / brew market+agent"
         ]);
-        pulse("confused");
+        pulse("confused", { energy: -2, curiosity: 1 });
         return;
       }
 
       addNestItem(skill);
+      setShowNest(true);
       echo(value, ["new skill unlocked:", skill, `= ${rest.split("+").join(" + ")} + curiosity`]);
-      pulse("happy");
+      pulse("happy", { energy: -3, focus: 3, curiosity: 8 });
       return;
     }
 
@@ -287,27 +342,30 @@ export function PipConsole() {
       const relic = relics[normalize(rest)];
       if (!relic) {
         echo(value, ["Pip can collect: bass / camera / market / music / skill / note"]);
-        pulse("confused");
+        pulse("confused", { energy: -2, curiosity: 1 });
         return;
       }
 
       addNestItem(relic);
+      setShowNest(true);
       echo(value, [`Pip tucked ${relic} into the nest.`]);
-      pulse("happy");
+      pulse("happy", { curiosity: 5 });
       return;
     }
 
     if (command === "nest") {
+      setShowNest(true);
       echo(value, ["nest inventory:", ...nest.map((item, index) => `[${index + 1}] ${item}`)]);
-      pulse("happy");
+      pulse("happy", { focus: 2, curiosity: 2 });
       return;
     }
 
     if (command === "hatch") {
       const hatch = nest.length >= 4 ? "a new project seed" : "a tiny idea feather";
       addNestItem(hatch);
+      setShowNest(true);
       echo(value, [`Pip warms the nest...`, `hatched: ${hatch}`]);
-      pulse("flying");
+      pulse("flying", { energy: -10, focus: 5, curiosity: 6 });
       return;
     }
 
@@ -315,24 +373,30 @@ export function PipConsole() {
       if (target === "night" || target === "dark") {
         setTheme("dark");
         echo(value, ["night theme enabled."]);
-        pulse("happy");
+        pulse("happy", { focus: 2 });
         return;
       }
       if (target === "light" || target === "day") {
         setTheme("light");
         echo(value, ["light theme enabled."]);
-        pulse("happy");
+        pulse("happy", { focus: 2 });
         return;
       }
 
       echo(value, ["try: theme night / theme light"]);
-      pulse("confused");
+      pulse("confused", { focus: -2 });
       return;
     }
 
     if (command === "where" || command === "map") {
-      echo(value, ["page map:", "top -> bottle", "work -> project archive", "contact -> email / github"]);
-      pulse("happy");
+      echo(value, [
+        "page map:",
+        "top     -> bottle / miniature objects",
+        "work    -> project archive",
+        "room    -> 3D room / personal objects",
+        "contact -> email / github"
+      ]);
+      pulse("happy", { focus: 4 });
       return;
     }
 
@@ -340,69 +404,77 @@ export function PipConsole() {
       if (target === "work") {
         scrollTo("#work");
         echo(value, ["jumping to work archive."]);
-        pulse("flying");
+        pulse("flying", { energy: -3, focus: 4 });
+        return;
+      }
+      if (target === "room") {
+        scrollTo("#room");
+        echo(value, ["jumping to 3D room."]);
+        pulse("flying", { energy: -3, focus: 4, curiosity: 2 });
         return;
       }
       if (target === "contact") {
         scrollTo("#contact");
         echo(value, ["jumping to contact."]);
-        pulse("flying");
+        pulse("flying", { energy: -3, focus: 4 });
         return;
       }
       if (target === "top" || target === "home") {
         scrollTo("#top");
         echo(value, ["back to the bottle."]);
-        pulse("flying");
+        pulse("flying", { energy: -3, focus: 4 });
         return;
       }
-      echo(value, ["try: goto top / goto work / goto contact"]);
-      pulse("confused");
+      echo(value, ["try: goto top / goto work / goto room / goto contact"]);
+      pulse("confused", { focus: -2 });
       return;
     }
 
     if (command === "contact") {
       echo(value, ["email  1277530323@qq.com", "github https://github.com/infiniteHY"]);
-      pulse("happy");
+      pulse("happy", { focus: 2 });
       return;
     }
 
     if (command === "github") {
       echo(value, ["opening GitHub profile."]);
-      pulse("flying");
+      pulse("flying", { energy: -4, focus: 3 });
       window.open("https://github.com/infiniteHY", "_blank", "noopener,noreferrer");
       return;
     }
 
     if (command === "email") {
       echo(value, ["opening mail composer."]);
-      pulse("flying");
+      pulse("flying", { energy: -3, focus: 3 });
       window.location.href = "mailto:1277530323@qq.com";
       return;
     }
 
     if (command === "sing") {
       addNestItem("four quiet notes");
+      setShowNest(true);
       echo(value, ["Pip hums:", "do mi sol la", "a small chord lands in the nest."]);
-      pulse("happy");
+      pulse("happy", { energy: 3, curiosity: 4 });
       return;
     }
 
     if (command === "fortune") {
       const pick = secrets[Math.floor(Date.now() / 1000) % secrets.length];
       echo(value, ["Pip's prompt:", pick]);
-      pulse("happy");
+      pulse("happy", { curiosity: 3 });
       return;
     }
 
     if (command === "secret") {
       addNestItem("secret feather");
+      setShowNest(true);
       echo(value, ["Pip found a hidden note:", secrets[0], "try: hatch"]);
-      pulse("happy");
+      pulse("happy", { curiosity: 8 });
       return;
     }
 
     echo(value, [`unknown command: ${cmd}`, "try: help"]);
-    pulse("confused");
+    pulse("confused", { energy: -3, focus: -5 });
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -421,18 +493,28 @@ export function PipConsole() {
       </div>
       <div className="pip-console" aria-label="Pip terminal console">
         <div className="pip-console-head mono">
-          <span>Pip Console</span>
-          <span>mood: {moodLabel}</span>
-        </div>
-        <div className="pip-relics mono" aria-label="Pip nest">
-          {nest.slice(-5).map((item) => (
-            <span key={item}>{item}</span>
-          ))}
+          <span className="pip-window-dots" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
+          <span className="pip-window-title">pip-console — zsh — 80x24</span>
+          <span>{moodLabel} · E{stats.energy} F{stats.focus} C{stats.curiosity}</span>
         </div>
         <div ref={logRef} className="pip-console-screen mono" role="log" aria-live="polite">
           {lines.map((line, index) => (
-            <p key={`${line}-${index}`}>{line || "\u00a0"}</p>
+            <p key={`${line.text}-${index}`} className={`terminal-line is-${line.type}`}>
+              {renderLine(line.text)}
+            </p>
           ))}
+          {showNest ? (
+            <div className="pip-relics" aria-label="Pip nest">
+              <span className="terminal-muted">nest:</span>
+              {nest.slice(-5).map((item) => (
+                <span key={item}>{item}</span>
+              ))}
+            </div>
+          ) : null}
           <form className="pip-command" onSubmit={handleSubmit}>
             <label htmlFor="pip-command-input">{prompt}</label>
             <input

@@ -10,7 +10,7 @@ export function RetroConsole() {
 
   return (
     <group
-      position={[1.08, 0.18, 0.98]}
+      position={[1.35, 0.38, 1.45]}
       rotation={[-0.62, 0.08, -0.08]}
       onPointerEnter={(event) => {
         event.stopPropagation();

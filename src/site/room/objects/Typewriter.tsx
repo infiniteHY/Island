@@ -10,8 +10,8 @@ export function Typewriter() {
 
   return (
     <group
-      position={[0.48, 0.94, -2.28]}
-      rotation={[0, -0.12, 0]}
+      position={[0.95, 0.83, -1.86]}
+      rotation={[0, -0.04, 0]}
       onPointerEnter={(event) => {
         event.stopPropagation();
         setHovered("typewriter");

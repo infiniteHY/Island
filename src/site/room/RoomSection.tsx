@@ -51,7 +51,7 @@ export function RoomSection() {
           className="room-canvas"
           shadows
           dpr={[1, 1.5]}
-          camera={{ position: [3.4, 2.7, 3.9], fov: 42, near: 0.1, far: 40 }}
+          camera={{ position: [3.0, 2.08, 3.55], fov: 50, near: 0.1, far: 40 }}
           frameloop={inView || focus ? "always" : "demand"}
         >
           <Suspense fallback={null}>

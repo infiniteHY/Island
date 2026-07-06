@@ -1,4 +1,4 @@
-import { Environment, Float } from "@react-three/drei";
+import { Float } from "@react-three/drei";
 import { Physics } from "@react-three/rapier";
 import gsap from "gsap";
 import { useEffect, useRef } from "react";
@@ -53,7 +53,7 @@ export function BottleScene({ activeId, onActiveChange, reducedMotion }: BottleS
       <directionalLight ref={keyLightRef} position={[3.2, 4.4, 4.2]} intensity={2.25} />
       <pointLight ref={rimLightRef} position={[-3, 1.5, 2]} intensity={0.85} color="#dceeff" />
       <pointLight ref={warmLightRef} position={[2.4, -1.5, 1.6]} intensity={0.34} color="#fff4d0" />
-      <Environment preset="city" />
+      <hemisphereLight intensity={0.42} color="#f3fbff" groundColor="#0b0e10" />
 
       {reducedMotion ? (
         <group>

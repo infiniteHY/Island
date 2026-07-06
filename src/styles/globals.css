@@ -369,18 +369,20 @@ a {
   z-index: 2;
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 1px;
   border-top: 1px var(--rule-style) var(--line);
   border-bottom: 1px var(--rule-style) var(--line);
   background: var(--line);
 }
 
-.bottle-nav a {
+.bottle-nav button {
   display: block;
+  width: 100%;
   min-height: 62px;
   padding: 12px 14px;
   background: transparent;
+  text-align: left;
   transition:
     background-color 180ms ease-out,
     color 180ms ease-out;
@@ -405,17 +407,17 @@ a {
   text-transform: uppercase;
 }
 
-.bottle-nav a:hover,
-.bottle-nav a:focus-visible,
-.bottle-nav a.is-active {
+.bottle-nav button:hover,
+.bottle-nav button:focus-visible,
+.bottle-nav button.is-active {
   background: color-mix(in srgb, var(--item-accent) 16%, rgb(var(--bg-deep)));
   color: var(--label-1);
   outline: 0;
 }
 
-.bottle-nav a:hover span,
-.bottle-nav a:focus-visible span,
-.bottle-nav a.is-active span {
+.bottle-nav button:hover span,
+.bottle-nav button:focus-visible span,
+.bottle-nav button.is-active span {
   color: var(--item-accent);
 }
 
@@ -806,13 +808,22 @@ a.work-panel:hover .work-title {
 
 .room-section {
   position: relative;
-  padding: clamp(48px, 8vh, 96px) var(--gutter);
+  min-height: calc(100svh - 58px);
+  padding: 0;
   border-top: 1px var(--rule-style) var(--line);
+  overflow: hidden;
+  background: rgb(var(--bg-deep));
 }
 
 .room-head {
+  position: absolute;
+  top: clamp(18px, 4vh, 40px);
+  left: var(--gutter);
+  right: var(--gutter);
+  z-index: 3;
   align-items: end;
   gap: 24px;
+  pointer-events: none;
 }
 
 .room-title {
@@ -826,18 +837,18 @@ a.work-panel:hover .work-title {
 
 .room-stage {
   position: relative;
-  width: min(100%, 1280px);
-  height: min(78svh, 760px);
-  min-height: 560px;
-  margin-inline: auto;
+  width: 100%;
+  height: calc(100svh - 58px);
+  min-height: 640px;
   overflow: hidden;
-  border: 1px solid var(--line);
+  border: 0;
   background: rgb(var(--bg-deep));
-  box-shadow: var(--sh-card);
+  box-shadow: none;
 }
 
 .room-stage[data-focused="true"] {
-  border-color: rgba(var(--accent-rgb), 0.45);
+  outline: 1px solid rgba(var(--accent-rgb), 0.45);
+  outline-offset: -1px;
 }
 
 .room-canvas {
@@ -847,10 +858,10 @@ a.work-panel:hover .work-title {
 
 .room-overlay {
   position: absolute;
-  inset: 16px;
+  inset: auto var(--gutter) clamp(18px, 4vh, 40px);
   z-index: 2;
   display: flex;
-  align-items: flex-start;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 16px;
   pointer-events: none;
@@ -968,23 +979,25 @@ a.work-panel:hover .work-title {
 
 @media (max-width: 1023px) {
   .room-stage {
-    height: 60svh;
-    min-height: 460px;
+    height: calc(100svh - 58px);
+    min-height: 560px;
   }
 }
 
 @media (max-width: 640px) {
   .room-head {
     display: block;
+    top: 18px;
   }
 
   .room-stage {
-    min-height: 380px;
+    min-height: 520px;
   }
 
   .room-overlay {
-    inset: 10px;
+    inset: auto 16px 16px;
     flex-direction: column;
+    align-items: stretch;
   }
 
   .room-hint {
@@ -1066,14 +1079,15 @@ a.work-panel:hover .work-title {
 .pip-console {
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(var(--label-d), 0.12);
-  border-radius: 8px;
+  border: 1px solid rgba(192, 254, 4, 0.18);
+  border-radius: 6px;
   background:
-    linear-gradient(180deg, rgba(var(--bg-elevated), 0.92), rgba(var(--bg-deep), 0.95)),
-    rgb(var(--bg-deep));
+    radial-gradient(circle at 20% 0%, rgba(var(--accent-rgb), 0.08), transparent 34%),
+    linear-gradient(180deg, rgba(8, 12, 10, 0.98), rgba(3, 5, 4, 0.98));
   box-shadow:
-    0 28px 90px rgba(0, 0, 0, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    0 28px 90px rgba(0, 0, 0, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.55);
 }
 
 .pip-console::before {
@@ -1081,23 +1095,59 @@ a.work-panel:hover .work-title {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-image: linear-gradient(rgba(var(--label-d), 0.05) 1px, transparent 1px);
-  background-size: 100% 18px;
-  opacity: 0.38;
+  background:
+    repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.045) 0 1px, transparent 1px 4px),
+    linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.04), transparent);
+  opacity: 0.5;
 }
 
 .pip-console-head {
   position: relative;
   z-index: 1;
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 14px 16px;
-  border-bottom: 1px solid rgba(var(--label-d), 0.1);
-  color: var(--label-2);
-  font-size: 0.75rem;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  border-bottom: 1px solid rgba(192, 254, 4, 0.12);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.015));
+  color: rgba(235, 255, 220, 0.58);
+  font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.08em;
+}
+
+.pip-window-dots {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.pip-window-dots i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(235, 255, 220, 0.3);
+}
+
+.pip-window-dots i:nth-child(1) {
+  background: #ff5f57;
+}
+
+.pip-window-dots i:nth-child(2) {
+  background: #ffbd2e;
+}
+
+.pip-window-dots i:nth-child(3) {
+  background: #28c840;
+}
+
+.pip-window-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+  color: rgba(235, 255, 220, 0.46);
 }
 
 .pip-relics {
@@ -1106,15 +1156,18 @@ a.work-panel:hover .work-title {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  padding: 10px 16px 0;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(192, 254, 4, 0.12);
+  color: rgba(235, 255, 220, 0.4);
 }
 
 .pip-relics span {
   max-width: 100%;
-  padding: 3px 7px;
-  border: 1px solid rgba(var(--label-d), 0.12);
-  background: rgba(var(--accent-rgb), 0.08);
-  color: var(--label-2);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: rgba(192, 254, 4, 0.72);
   font-size: 0.68rem;
   line-height: 1.2;
   overflow: hidden;
@@ -1126,24 +1179,24 @@ a.work-panel:hover .work-title {
   position: relative;
   z-index: 1;
   height: 320px;
-  padding: 16px;
+  padding: 14px 14px 16px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  color: var(--label-1);
-  font-size: 0.78rem;
-  line-height: 1.58;
-  letter-spacing: 0.02em;
+  color: rgba(235, 255, 220, 0.74);
+  font-size: 0.76rem;
+  line-height: 1.55;
+  letter-spacing: 0;
   scrollbar-width: none;
   -ms-overflow-style: none;
   scroll-behavior: smooth;
+  text-transform: none;
 }
 
 .pip-console-screen p {
   margin: 0;
-  min-height: 1.55em;
+  min-height: 1.5em;
   white-space: pre-wrap;
-  color: var(--label-2);
 }
 
 .pip-console-screen::-webkit-scrollbar {
@@ -1154,14 +1207,15 @@ a.work-panel:hover .work-title {
   margin-top: auto;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding-top: 8px;
+  gap: 9px;
+  padding-top: 10px;
 }
 
 .pip-command label {
   flex: 0 0 auto;
   color: var(--accent);
   font-weight: 700;
+  text-shadow: 0 0 10px rgba(var(--accent-rgb), 0.45);
 }
 
 .pip-command input {
@@ -1170,10 +1224,50 @@ a.work-panel:hover .work-title {
   border: 0;
   outline: 0;
   background: transparent;
-  color: var(--label-1);
+  color: rgba(245, 255, 238, 0.95);
   font: inherit;
   letter-spacing: inherit;
   caret-color: var(--accent);
+}
+
+.terminal-line {
+  font-variant-ligatures: none;
+}
+
+.terminal-line a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+}
+
+.terminal-line a:hover {
+  color: var(--accent);
+}
+
+.terminal-line.is-boot {
+  color: rgba(235, 255, 220, 0.46);
+}
+
+.terminal-line.is-prompt {
+  color: var(--accent);
+  text-shadow: 0 0 10px rgba(var(--accent-rgb), 0.28);
+}
+
+.terminal-line.is-output {
+  color: rgba(235, 255, 220, 0.68);
+}
+
+.terminal-line.is-error {
+  color: #ff8e7a;
+}
+
+.terminal-line.is-success {
+  color: #bfffb0;
+}
+
+.terminal-muted {
+  color: rgba(235, 255, 220, 0.36) !important;
 }
 
 .work-panel.is-pip-scanned .work-cover {
@@ -1419,7 +1513,7 @@ a.work-panel:hover .work-title {
   }
 
   .bottle-nav {
-    grid-template-columns: repeat(5, minmax(140px, 1fr));
+    grid-template-columns: repeat(6, minmax(130px, 1fr));
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
@@ -1486,7 +1580,7 @@ a.work-panel:hover .work-title {
     border-right: 0;
   }
 
-  .bottle-nav a {
+  .bottle-nav button {
     min-height: 58px;
     padding: 10px 12px;
   }

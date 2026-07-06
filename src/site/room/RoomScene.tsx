@@ -27,17 +27,18 @@ export function RoomScene({ reducedMotion }: RoomSceneProps) {
 
   return (
     <>
-      <color attach="background" args={[dark ? "#131514" : "#f6f1e7"]} />
-      <ambientLight intensity={dark ? 0.34 : 0.58} />
+      <color attach="background" args={[dark ? "#080d18" : "#f4efe6"]} />
+      <ambientLight intensity={dark ? 0.46 : 0.62} />
       <directionalLight
-        position={[-3.2, 4.2, -1.6]}
-        intensity={dark ? 1.15 : 1.5}
-        color={dark ? "#ffb36d" : "#fff0cf"}
+        position={[-2.6, 4.8, 3.4]}
+        intensity={dark ? 1.05 : 1.35}
+        color={dark ? "#d7e4ff" : "#fff3dc"}
         castShadow
         shadow-mapSize-width={1024}
         shadow-mapSize-height={1024}
       />
-      <pointLight position={[-0.15, 1.55, -2.25]} intensity={dark ? 1.25 : 0.72} color="#ffc76a" distance={3.2} />
+      <pointLight position={[1.4, 0.42, -2.05]} intensity={dark ? 1.4 : 0.9} color="#ffc07a" distance={4.2} />
+      <pointLight position={[2.0, 2.18, -2.7]} intensity={dark ? 0.8 : 0.55} color="#ffd39b" distance={2.4} />
       <RoomCamera reducedMotion={reducedMotion} />
       <group onClick={clearFocus}>
         <RoomShell />
