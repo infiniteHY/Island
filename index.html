@@ -8,6 +8,17 @@
       content="我的小世界：阅读、训练、投资、项目与爵士乐,把生活的积累记录在同一个地方。"
     />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script>
+      (() => {
+        try {
+          const saved = localStorage.getItem("site-theme");
+          const dark = saved === "dark" || (!saved && matchMedia("(prefers-color-scheme: dark)").matches);
+          document.documentElement.classList.toggle("dark", dark);
+        } catch {
+          /* keep default light theme */
+        }
+      })();
+    </script>
     <title>我的小世界 — HANYA©2026</title>
   </head>
   <body>

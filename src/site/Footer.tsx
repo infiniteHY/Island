@@ -34,18 +34,54 @@ export function Footer() {
       </motion.div>
       <motion.aside
         className="footer-profile"
-        initial={reducedMotion ? false : { opacity: 0, y: 18 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-80px" }}
-        transition={{ duration: 0.7, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+        initial={reducedMotion ? false : "hidden"}
+        whileInView="show"
+        viewport={{ once: false, margin: "-60px" }}
+        variants={{
+          hidden: { opacity: 0, y: 20, filter: "blur(8px)" },
+          show: {
+            opacity: 1,
+            y: 0,
+            filter: "blur(0px)",
+            transition: {
+              duration: 0.62,
+              delay: 0.08,
+              ease: [0.22, 1, 0.36, 1],
+              staggerChildren: 0.08
+            }
+          }
+        }}
         aria-label="个人介绍"
       >
+        <motion.i
+          className="footer-profile-scan"
+          aria-hidden="true"
+          variants={{
+            hidden: { opacity: 0, x: "-120%" },
+            show: {
+              opacity: [0, 1, 1, 0],
+              x: ["-120%", "-20%", "42%", "120%"],
+              transition: { duration: 0.9, delay: 0.12, ease: [0.66, 0, 0.01, 1] }
+            }
+          }}
+        />
         <div className="footer-profile-copy">
-          <p className="mono label-3">PROFILE.NODE</p>
-          <strong>Computer Vision Engineer</strong>
-          <span>Building perception systems, playful tools, and personal worlds.</span>
+          <motion.p className="mono label-3" variants={{ hidden: { opacity: 0, x: 12 }, show: { opacity: 1, x: 0 } }}>
+            PROFILE.NODE
+          </motion.p>
+          <motion.strong variants={{ hidden: { opacity: 0, x: 14 }, show: { opacity: 1, x: 0 } }}>
+            Computer Vision Engineer
+          </motion.strong>
+          <motion.span variants={{ hidden: { opacity: 0, x: 16 }, show: { opacity: 1, x: 0 } }}>
+            Building perception systems, playful tools, and personal worlds.
+          </motion.span>
         </div>
-        <img src={mePhoto} alt="Hanya portrait" />
+        <motion.div
+          className="footer-avatar"
+          variants={{ hidden: { opacity: 0, scale: 0.92, rotate: -2 }, show: { opacity: 1, scale: 1, rotate: 0 } }}
+        >
+          <img src={mePhoto} alt="Hanya portrait" />
+        </motion.div>
       </motion.aside>
     </footer>
   );

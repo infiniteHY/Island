@@ -65,11 +65,18 @@ export function BottleGlass() {
           clearcoatRoughness={0.02}
           envMapIntensity={1.65}
           depthWrite={false}
-          color="#eaf8ff"
+          color="#ffffff"
+          attenuationColor="#ffffff"
+          attenuationDistance={3.8}
         />
       </mesh>
       <mesh geometry={geometry} scale={[1.006, 1.002, 1.006]}>
-        <meshBasicMaterial transparent opacity={0.18} color="#7ea5b8" depthWrite={false} />
+        <meshBasicMaterial
+          transparent
+          opacity={0.16}
+          color="#ffffff"
+          depthWrite={false}
+        />
       </mesh>
     </group>
   );

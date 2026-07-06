@@ -1,8 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import { useSiteStore } from "./siteStore";
 import { Header } from "./Header";
 import { BottleHero } from "./glass-bottle/BottleHero";
 import { Work } from "./Work";
+import { RoomSection } from "./room/RoomSection";
 import { Cta } from "./Cta";
 import { Footer } from "./Footer";
 import { Atmosphere } from "./fx/Atmosphere";
@@ -12,7 +13,7 @@ export function Site() {
   const theme = useSiteStore((state) => state.theme);
   const setReducedMotion = useSiteStore((state) => state.setReducedMotion);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
   }, [theme]);
 
@@ -32,6 +33,7 @@ export function Site() {
       <main>
         <BottleHero />
         <Work />
+        <RoomSection />
         <Cta />
       </main>
       <Footer />

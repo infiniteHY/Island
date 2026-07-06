@@ -7,6 +7,14 @@
 > 参考对象：[henryheffernan.com](https://henryheffernan.com)（点击电脑进入可操作系统）、[jesse-zhou.com](https://jesse-zhou.com)（氛围感 3D 小屋 + 可交互物件）。
 > 学其骨不抄其皮：借鉴「固定视角房间 + 点击物件相机飞入 + 屏幕内真实可玩」的交互结构，视觉走本站已有的低模 + 编辑排版 + 酸性绿 accent 路线，**不做 Blender 烘焙资产**（全程序化几何体，未来可逐件替换 GLB）。
 
+
+  8 tasks (2 done, 1 in progress, 5 open)
+  ◼ 搭建"家"房间 3D 场景骨架（RoomSection/RoomScene/相机聚焦）
+  ◻ 电脑 + 贪吃蛇、复古掌机 + 打砖块
+  ◻ 唱片机 + 本地音频播放
+  ◻ 打字机 + 实时留言（前端）
+  ◻ Cloudflare Worker 留言后端代码
+   … +1 pending, 2 completed
 ---
 
 ## 0. 一句话定义

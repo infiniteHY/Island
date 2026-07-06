@@ -12,6 +12,7 @@ export function BottleHero() {
   const reducedMotion = useSiteStore((state) => state.reducedMotion);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [compactScene, setCompactScene] = useState(false);
+  const [sceneReady, setSceneReady] = useState(false);
   const staticScene = reducedMotion || compactScene;
 
   useEffect(() => {
@@ -64,10 +65,14 @@ export function BottleHero() {
         transition={{ duration: 0.9, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
       >
         <Canvas
-          className="bottle-canvas"
+          className={`bottle-canvas${sceneReady ? " is-ready" : ""}`}
           dpr={[1, 1.5]}
           camera={{ position: [0, 0.05, 7.2], fov: 39 }}
           gl={{ antialias: true, alpha: true }}
+          onCreated={({ gl }) => {
+            gl.setClearColor(0x000000, 0);
+            setSceneReady(true);
+          }}
         >
           <Suspense fallback={null}>
             <BottleScene activeId={activeId} onActiveChange={setActiveId} reducedMotion={staticScene} />
