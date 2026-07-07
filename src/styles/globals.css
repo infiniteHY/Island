@@ -827,11 +827,11 @@ a.work-panel:hover .work-title {
 }
 
 .room-title {
-  max-width: 42em;
+  max-width: 32em;
   margin: 14px 0 0;
-  font-size: clamp(1.1rem, 1.7vw, 1.45rem);
+  font-size: clamp(0.98rem, 1.3vw, 1.2rem);
   font-weight: 500;
-  line-height: 1.75;
+  line-height: 1.65;
   color: var(--label-2);
 }
 
@@ -887,9 +887,9 @@ a.work-panel:hover .work-title {
 }
 
 .room-hint {
-  max-width: min(480px, 100%);
+  max-width: min(340px, 100%);
   margin-left: auto;
-  padding: 10px 12px;
+  padding: 8px 10px;
   color: var(--label-3);
   text-align: right;
 }

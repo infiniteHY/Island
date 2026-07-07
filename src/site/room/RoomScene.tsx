@@ -1,12 +1,8 @@
 import type { ThreeEvent } from "@react-three/fiber";
 import { useRoomStore } from "./roomStore";
 import { RoomCamera } from "./RoomCamera";
-import { RoomShell } from "./objects/RoomShell";
-import { Furniture } from "./objects/Furniture";
-import { DeskComputer } from "./objects/DeskComputer";
-import { RetroConsole } from "./objects/RetroConsole";
-import { RecordPlayer } from "./objects/RecordPlayer";
-import { Typewriter } from "./objects/Typewriter";
+import { RoomHotspots } from "./objects/RoomHotspots";
+import { RoomModel } from "./objects/RoomModel";
 import { useSiteStore } from "../siteStore";
 
 type RoomSceneProps = {
@@ -28,26 +24,24 @@ export function RoomScene({ reducedMotion }: RoomSceneProps) {
   return (
     <>
       <color attach="background" args={[dark ? "#080d18" : "#f4efe6"]} />
-      <ambientLight intensity={dark ? 0.46 : 0.62} />
+      <fog attach="fog" args={[dark ? "#080d18" : "#f4efe6", 7.5, 13]} />
+      <ambientLight intensity={dark ? 0.5 : 0.68} />
       <directionalLight
         position={[-2.6, 4.8, 3.4]}
-        intensity={dark ? 1.05 : 1.35}
+        intensity={dark ? 1.15 : 1.45}
         color={dark ? "#d7e4ff" : "#fff3dc"}
         castShadow
         shadow-mapSize-width={1024}
         shadow-mapSize-height={1024}
       />
-      <pointLight position={[1.4, 0.42, -2.05]} intensity={dark ? 1.4 : 0.9} color="#ffc07a" distance={4.2} />
-      <pointLight position={[2.0, 2.18, -2.7]} intensity={dark ? 0.8 : 0.55} color="#ffd39b" distance={2.4} />
+      <pointLight position={[0.1, 0.28, -2.95]} intensity={dark ? 1.8 : 1.25} color="#ffc07a" distance={5.2} />
+      <pointLight position={[-1.16, 2.42, -2.82]} intensity={dark ? 1.35 : 1.0} color="#ffb46b" distance={2.6} />
+      <pointLight position={[2.08, 2.08, -2.76]} intensity={dark ? 0.9 : 0.62} color="#ffd39b" distance={2.2} />
       <RoomCamera reducedMotion={reducedMotion} />
       <group onClick={clearFocus}>
-        <RoomShell />
-        <Furniture />
+        <RoomModel reducedMotion={reducedMotion} />
       </group>
-      <DeskComputer />
-      <Typewriter />
-      <RecordPlayer reducedMotion={reducedMotion} />
-      <RetroConsole />
+      <RoomHotspots />
     </>
   );
 }
