@@ -6,13 +6,13 @@ import { useRoomStore, type RoomFocusId } from "./roomStore";
 
 type CameraPose = { position: [number, number, number]; target: [number, number, number] };
 
-const OVERVIEW: CameraPose = { position: [3.18, 2.32, 3.1], target: [-0.35, 1.02, -1.66] };
+const OVERVIEW: CameraPose = { position: [3.34, 2.58, 3.42], target: [-0.22, 1.0, -1.38] };
 
 export const FOCUS_POSES: Record<RoomFocusId, CameraPose> = {
-  computer: { position: [-1.92, 1.48, -0.35], target: [-1.92, 1.08, -2.02] },
-  typewriter: { position: [0.95, 1.42, -0.28], target: [0.58, 0.94, -1.45] },
-  vinyl: { position: [2.62, 1.3, -0.78], target: [2.24, 0.82, -1.95] },
-  console: { position: [0.92, 1.12, 1.64], target: [0.56, 0.34, 0.38] }
+  computer: { position: [-1.9, 1.72, -0.42], target: [-1.9, 1.46, -2.18] },
+  typewriter: { position: [0.84, 1.46, -0.28], target: [0.95, 1.02, -1.86] },
+  vinyl: { position: [2.72, 1.34, -0.7], target: [2.22, 0.84, -1.84] },
+  console: { position: [-0.62, 1.46, -0.72], target: [-0.78, 1.08, -2.02] }
 };
 
 type RoomCameraProps = {

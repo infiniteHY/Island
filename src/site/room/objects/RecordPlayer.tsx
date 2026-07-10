@@ -18,7 +18,7 @@ export function RecordPlayer({ reducedMotion }: { reducedMotion: boolean }) {
 
   return (
     <group
-      position={[2.22, 0.82, -1.84]}
+      position={[2.22, 0.78, -1.84]}
       onPointerEnter={(event) => {
         event.stopPropagation();
         setHovered("vinyl");

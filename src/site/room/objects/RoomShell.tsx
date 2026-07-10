@@ -1,7 +1,7 @@
 import { useSiteStore } from "../../siteStore";
 import { useMemo } from "react";
 
-/** 房间壳：星空墙 / 浅色地面 / 暖色灯带 / 地毯 */
+/** 开放式两墙房间：从右前方观看时不会被墙体挡住。 */
 export function RoomShell() {
   const theme = useSiteStore((state) => state.theme);
   const dark = theme === "dark";
@@ -68,11 +68,6 @@ export function RoomShell() {
         <boxGeometry args={[0.12, 4.32, 6.6]} />
         <meshStandardMaterial color={wallSide} roughness={0.9} />
       </mesh>
-      <mesh position={[3.26, 2.05, 0]} receiveShadow>
-        <boxGeometry args={[0.12, 4.32, 6.6]} />
-        <meshStandardMaterial color={wallSide} roughness={0.9} />
-      </mesh>
-
       {/* 程序化银河：用柔和星云斑点避免贴图依赖 */}
       {nebula.map((blob, index) => (
         <mesh key={index} position={[blob.x, blob.y, -3.175]} rotation={[0, 0, -0.28]} scale={[1.8, 0.58, 1]}>
@@ -92,16 +87,13 @@ export function RoomShell() {
           <meshBasicMaterial color="#f5f7ff" transparent opacity={star.opacity} depthWrite={false} />
         </mesh>
       ))}
-      {sideStars.map((star, index) => (
-        <mesh key={index} position={[3.17, star.y, star.z]} rotation={[0, -Math.PI / 2, 0]}>
-          <circleGeometry args={[star.size, 8]} />
-          <meshBasicMaterial color="#f5f7ff" transparent opacity={star.opacity * 0.68} depthWrite={false} />
-        </mesh>
-      ))}
-
       {/* 暖色地脚灯带 */}
       <mesh position={[0, 0.075, -3.17]}>
         <boxGeometry args={[6.35, 0.035, 0.028]} />
+        <meshBasicMaterial color={light} />
+      </mesh>
+      <mesh position={[-3.17, 0.075, 0]}>
+        <boxGeometry args={[0.028, 0.035, 6.35]} />
         <meshBasicMaterial color={light} />
       </mesh>
       <pointLight position={[0, 0.18, -2.95]} intensity={dark ? 0.9 : 0.7} color={light} distance={4.8} />
@@ -110,10 +102,6 @@ export function RoomShell() {
       <mesh position={[-0.9, 0.012, 0.55]} rotation={[-Math.PI / 2, 0, 0]}>
         <boxGeometry args={[2.7, 1.75, 0.018]} />
         <meshStandardMaterial color={dark ? "#45464b" : "#b9b8ba"} roughness={0.95} />
-      </mesh>
-      <mesh position={[1.35, 0.15, 1.45]} castShadow receiveShadow>
-        <boxGeometry args={[1.85, 0.3, 0.95]} />
-        <meshStandardMaterial color={dark ? "#d4b98f" : "#dfc69d"} roughness={0.62} />
       </mesh>
     </group>
   );

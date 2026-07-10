@@ -10,8 +10,9 @@ export function RetroConsole() {
 
   return (
     <group
-      position={[1.35, 0.38, 1.45]}
+      position={[-0.78, 1.1, -2.02]}
       rotation={[-0.62, 0.08, -0.08]}
+      scale={0.58}
       onPointerEnter={(event) => {
         event.stopPropagation();
         setHovered("console");

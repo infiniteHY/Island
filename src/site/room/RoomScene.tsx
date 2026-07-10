@@ -1,7 +1,6 @@
 import type { ThreeEvent } from "@react-three/fiber";
 import { useRoomStore } from "./roomStore";
 import { RoomCamera } from "./RoomCamera";
-import { RoomHotspots } from "./objects/RoomHotspots";
 import { RoomModel } from "./objects/RoomModel";
 import { useSiteStore } from "../siteStore";
 
@@ -41,7 +40,6 @@ export function RoomScene({ reducedMotion }: RoomSceneProps) {
       <group onClick={clearFocus}>
         <RoomModel reducedMotion={reducedMotion} />
       </group>
-      <RoomHotspots />
     </>
   );
 }

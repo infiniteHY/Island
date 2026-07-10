@@ -10,7 +10,7 @@ export function DeskComputer() {
 
   return (
     <group
-      position={[-1.9, 0.93, -2.22]}
+      position={[-1.9, 1.49, -2.22]}
       rotation={[0, 0.03, 0]}
       onPointerEnter={(event) => {
         event.stopPropagation();
