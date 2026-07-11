@@ -43,13 +43,12 @@ export function RoomSection() {
             这里像家。电脑里有游戏，唱片机里有歌，打字机上敲下的字，会寄到我手里。
           </h2>
         </div>
-        <p className="mono label-3">Click glowing objects · ESC back</p>
       </div>
 
       <div className="room-stage" data-focused={Boolean(focus)}>
         <Canvas
           className="room-canvas"
-          shadows
+          shadows="soft"
           dpr={[1, 1.5]}
           camera={{ position: [3.0, 2.08, 3.55], fov: 50, near: 0.1, far: 40 }}
           frameloop={inView || focus ? "always" : "demand"}

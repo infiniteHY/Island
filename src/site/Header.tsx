@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useRoomStore } from "./room/roomStore";
 import { useSiteStore } from "./siteStore";
 import { useClock } from "./useClock";
 import { usePointer } from "./usePointer";
@@ -10,6 +11,8 @@ function useHotkeys() {
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return;
+      // 房间物件聚焦时按键交给场景（打字机 / 贪吃蛇），不触发全站快捷键
+      if (useRoomStore.getState().focus) return;
       const target = event.target as HTMLElement | null;
       if (target && /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)) return;
 

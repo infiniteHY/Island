@@ -1,3 +1,4 @@
+import { Cat } from "./Cat";
 import { DeskComputer } from "./DeskComputer";
 import { Furniture } from "./Furniture";
 import { RecordPlayer } from "./RecordPlayer";
@@ -14,6 +15,7 @@ export function RoomModel({ reducedMotion }: { reducedMotion: boolean }) {
       <Typewriter />
       <RecordPlayer reducedMotion={reducedMotion} />
       <RetroConsole />
+      <Cat reducedMotion={reducedMotion} />
     </group>
   );
 }

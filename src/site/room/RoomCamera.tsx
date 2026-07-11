@@ -9,10 +9,13 @@ type CameraPose = { position: [number, number, number]; target: [number, number,
 const OVERVIEW: CameraPose = { position: [3.34, 2.58, 3.42], target: [-0.22, 1.0, -1.38] };
 
 export const FOCUS_POSES: Record<RoomFocusId, CameraPose> = {
-  computer: { position: [-1.9, 1.72, -0.42], target: [-1.9, 1.46, -2.18] },
-  typewriter: { position: [0.84, 1.46, -0.28], target: [0.95, 1.02, -1.86] },
-  vinyl: { position: [2.72, 1.34, -0.7], target: [2.22, 0.84, -1.84] },
-  console: { position: [-0.62, 1.46, -0.72], target: [-0.78, 1.08, -2.02] }
+  computer: { position: [-1.93, 1.45, -0.85], target: [-1.95, 1.3, -2.1] },
+  typewriter: { position: [0.72, 1.32, -0.55], target: [0.78, 1.02, -1.95] },
+  vinyl: { position: [2.35, 1.35, -0.75], target: [2.18, 0.86, -1.98] },
+  console: { position: [-0.63, 1.22, -1.28], target: [-0.85, 0.95, -2.0] },
+  bookshelf: { position: [-0.52, 1.0, -0.55], target: [-2.98, 1.0, -0.55] },
+  map: { position: [2.78, 2.12, -2.0], target: [2.78, 2.12, -3.19] },
+  blackboard: { position: [-1.62, 2.08, 1.0], target: [-3.17, 2.08, 1.0] }
 };
 
 type RoomCameraProps = {

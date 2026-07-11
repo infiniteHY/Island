@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type RoomFocusId = "computer" | "console" | "vinyl" | "typewriter";
+export type RoomFocusId = "computer" | "console" | "vinyl" | "typewriter" | "bookshelf" | "map" | "blackboard";
 
 type RoomState = {
   focus: RoomFocusId | null;
@@ -28,18 +28,33 @@ export const ROOM_OBJECT_META: Record<RoomFocusId, { label: string; subtitle: st
     hint: "方向键 / WASD 移动 · ESC 退出"
   },
   console: {
-    label: "Console",
+    label: "Switch",
     subtitle: "BREAKOUT",
-    hint: "← → 或鼠标移动挡板 · ESC 退出"
+    hint: "← → / A D 或鼠标移挡板 · ESC 退出"
   },
   vinyl: {
     label: "Record Player",
     subtitle: "NOW SPINNING",
-    hint: "点击唱片播放 / 暂停 · ESC 退出"
+    hint: "START 播放 · STOP 停止 · ESC 退出"
   },
   typewriter: {
     label: "Typewriter",
     subtitle: "LEAVE A MESSAGE",
     hint: "直接打字 · 寄出后我能收到 · ESC 退出"
+  },
+  bookshelf: {
+    label: "Bookshelf",
+    subtitle: "MY SHELF",
+    hint: "以后这里放我喜欢的书 · ESC 退出"
+  },
+  map: {
+    label: "World Map",
+    subtitle: "PLACES & DREAMS",
+    hint: "红钉去过 · 黄钉想去 · ESC 退出"
+  },
+  blackboard: {
+    label: "Blackboard",
+    subtitle: "VISION BOARD",
+    hint: "未来的愿景板 · ESC 退出"
   }
 };
