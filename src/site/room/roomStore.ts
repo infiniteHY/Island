@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type RoomFocusId = "computer" | "console" | "vinyl" | "typewriter" | "bookshelf" | "map" | "blackboard";
+export type RoomFocusId = "computer" | "console" | "vinyl" | "typewriter" | "bookshelf" | "map" | "blackboard" | "porthole";
 
 type RoomState = {
   focus: RoomFocusId | null;
@@ -56,5 +56,10 @@ export const ROOM_OBJECT_META: Record<RoomFocusId, { label: string; subtitle: st
     label: "Blackboard",
     subtitle: "VISION BOARD",
     hint: "未来的愿景板 · ESC 退出"
+  },
+  porthole: {
+    label: "Porthole",
+    subtitle: "THE MILKY WAY",
+    hint: "舷窗外的真实银河（ESO 全景摄影） · ESC 退出"
   }
 };

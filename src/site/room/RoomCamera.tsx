@@ -15,7 +15,8 @@ export const FOCUS_POSES: Record<RoomFocusId, CameraPose> = {
   console: { position: [-0.63, 1.22, -1.28], target: [-0.85, 0.95, -2.0] },
   bookshelf: { position: [-0.52, 1.0, -0.55], target: [-2.98, 1.0, -0.55] },
   map: { position: [2.78, 2.12, -2.0], target: [2.78, 2.12, -3.19] },
-  blackboard: { position: [-1.62, 2.08, 1.0], target: [-3.17, 2.08, 1.0] }
+  blackboard: { position: [-1.62, 2.08, 1.0], target: [-3.17, 2.08, 1.0] },
+  porthole: { position: [0.2, 2.1, -1.35], target: [0.2, 2.1, -3.27] }
 };
 
 type RoomCameraProps = {
