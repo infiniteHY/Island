@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useSiteStore } from "../../siteStore";
 import { useRoomStore } from "../roomStore";
 import { RoomObjectLabel } from "../RoomObjectLabel";
@@ -6,9 +7,88 @@ import { PothosPlant } from "./PothosPlant";
 
 /**
  * 家具组：实木书桌（抽屉柜/圆柱腿/横撑）、人体工学椅（软垫/扶手/五星脚滚轮）、
- * 开放书柜（可点击，错落书脊/垂蔓植物）、长边柜（柜门/把手/锥形腿）、落地灯、蝴蝶兰、黑板。
+ * 开放书柜（可点击，错落书脊/垂蔓植物）、长边柜（柜门/把手/锥形腿）、
+ * 落地灯（底座按钮可开关）、蝴蝶兰、黑板。
  * 台面高度与 DeskComputer / Typewriter / RecordPlayer 的锚点保持一致。
  */
+
+/** 落地灯：底座带圆形开关按钮，点击切换灯光与灯泡亮灭 */
+function FloorLamp({ position }: { position: [number, number, number] }) {
+  const [on, setOn] = useState(true);
+  const [pressed, setPressed] = useState(false);
+
+  const toggle = () => {
+    setPressed(true);
+    window.setTimeout(() => setPressed(false), 140);
+    setOn((v) => !v);
+  };
+
+  return (
+    <group position={position}>
+      {/* 底座整体可点（按钮本身太小，远景不好点中），点击即按下开关 */}
+      <group
+        onPointerEnter={(event) => {
+          event.stopPropagation();
+          document.body.style.cursor = "pointer";
+        }}
+        onPointerLeave={(event) => {
+          event.stopPropagation();
+          document.body.style.cursor = "";
+        }}
+        onClick={(event) => {
+          event.stopPropagation();
+          toggle();
+        }}
+      >
+        <mesh position={[0, 0.02, 0]} castShadow>
+          <cylinderGeometry args={[0.16, 0.18, 0.04, 20]} />
+          <meshStandardMaterial color="#2e2c28" roughness={0.5} />
+        </mesh>
+        {/* 底座开关按钮：朝房间一侧，亮微光提示可点 */}
+        <group position={[0.115, pressed ? 0.042 : 0.052, 0.08]}>
+          <mesh>
+            <cylinderGeometry args={[0.03, 0.034, 0.018, 14]} />
+            <meshStandardMaterial color="#454138" roughness={0.5} />
+          </mesh>
+          <mesh position={[0, 0.011, 0]}>
+            <cylinderGeometry args={[0.022, 0.022, 0.012, 14]} />
+            <meshStandardMaterial
+              color={on ? "#e8a84c" : "#6b6357"}
+              emissive={on ? "#e8a84c" : "#000000"}
+              emissiveIntensity={on ? 0.6 : 0}
+              roughness={0.4}
+            />
+          </mesh>
+        </group>
+      </group>
+      <mesh position={[0, 0.78, 0]} castShadow>
+        <cylinderGeometry args={[0.016, 0.016, 1.5, 10]} />
+        <meshStandardMaterial color="#3a3630" metalness={0.5} roughness={0.4} />
+      </mesh>
+      <mesh position={[0, 1.62, 0]} castShadow>
+        <cylinderGeometry args={[0.13, 0.19, 0.3, 20, 1, true]} />
+        <meshStandardMaterial color="#e8d8b8" roughness={0.65} side={2} />
+      </mesh>
+      <mesh position={[0, 1.56, 0]}>
+        <sphereGeometry args={[0.06, 12, 10]} />
+        <meshStandardMaterial
+          color={on ? "#ffe1ae" : "#b9ac93"}
+          emissive={on ? "#ffe1ae" : "#000000"}
+          emissiveIntensity={on ? 1 : 0}
+          roughness={0.5}
+        />
+      </mesh>
+      {on ? (
+        <>
+          <pointLight position={[0, 1.55, 0]} intensity={2.2} color="#ffce8f" distance={5.5} decay={1.6} />
+          {/* 灯罩上下溢光 */}
+          <pointLight position={[0, 1.95, 0]} intensity={0.6} color="#ffd9a0" distance={2.4} />
+        </>
+      ) : null}
+    </group>
+  );
+}
+
 export function Furniture() {
   const dark = useSiteStore((state) => state.theme === "dark");
   const setFocus = useRoomStore((state) => state.setFocus);
@@ -296,28 +376,8 @@ export function Furniture() {
       {/* ── 右前角：蝴蝶兰盆栽（收进画面内） ── */}
       <Orchid position={[2.3, 0, 0.3]} />
 
-      {/* ── 左前角：落地灯（暖光） ── */}
-      <group position={[-2.75, 0, 1.9]}>
-        <mesh position={[0, 0.02, 0]} castShadow>
-          <cylinderGeometry args={[0.16, 0.18, 0.04, 20]} />
-          <meshStandardMaterial color="#2e2c28" roughness={0.5} />
-        </mesh>
-        <mesh position={[0, 0.78, 0]} castShadow>
-          <cylinderGeometry args={[0.016, 0.016, 1.5, 10]} />
-          <meshStandardMaterial color="#3a3630" metalness={0.5} roughness={0.4} />
-        </mesh>
-        <mesh position={[0, 1.62, 0]} castShadow>
-          <cylinderGeometry args={[0.13, 0.19, 0.3, 20, 1, true]} />
-          <meshStandardMaterial color="#e8d8b8" roughness={0.65} side={2} />
-        </mesh>
-        <mesh position={[0, 1.56, 0]}>
-          <sphereGeometry args={[0.06, 12, 10]} />
-          <meshBasicMaterial color="#ffe1ae" />
-        </mesh>
-        <pointLight position={[0, 1.55, 0]} intensity={2.2} color="#ffce8f" distance={5.5} decay={1.6} />
-        {/* 灯罩上下溢光 */}
-        <pointLight position={[0, 1.95, 0]} intensity={0.6} color="#ffd9a0" distance={2.4} />
-      </group>
+      {/* ── 左前角：落地灯（底座按钮开关暖光） ── */}
+      <FloorLamp position={[-2.75, 0, 1.9]} />
 
       {/* ── 左墙黑板（未来的愿景板，可点击放大细看；随书柜一起沿墙前移） ── */}
       <group
