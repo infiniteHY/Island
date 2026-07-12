@@ -45,7 +45,7 @@ function FloorLamp({ position }: { position: [number, number, number] }) {
           <meshStandardMaterial color="#2e2c28" roughness={0.5} />
         </mesh>
         {/* 底座开关按钮：朝房间一侧，亮微光提示可点 */}
-        <group position={[0.115, pressed ? 0.042 : 0.052, 0.08]}>
+        <group position={[0.135, pressed ? 0.042 : 0.052, 0.035]}>
           <mesh>
             <cylinderGeometry args={[0.03, 0.034, 0.018, 14]} />
             <meshStandardMaterial color="#454138" roughness={0.5} />

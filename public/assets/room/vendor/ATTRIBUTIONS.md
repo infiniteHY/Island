@@ -8,6 +8,10 @@
   Local archive: `kenney_furniture-kit.zip`
   Used for: desk, chair, cabinet, bookcase, rug, sofa, pillow, books, plant, lamp, radio, speaker, computer screen, keyboard, mouse.
 
+- Orchid & Pothos plant models (`../plants/orchid.glb`, `../plants/pothos.glb`)
+  Generated in-house with Blender 5.1 via `scripts/make_plants.py` (procedural, no external assets).
+  Regenerate: `/Applications/Blender.app/Contents/MacOS/Blender --background --python scripts/make_plants.py`
+
 ## Notes
 
 - Sketchfab search results were evaluated for retro computer, typewriter, record player, and handheld console assets, but the public download endpoint requires an authenticated Sketchfab API token.
