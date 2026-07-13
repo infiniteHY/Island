@@ -8,9 +8,16 @@
   Local archive: `kenney_furniture-kit.zip`
   Used for: desk, chair, cabinet, bookcase, rug, sofa, pillow, books, plant, lamp, radio, speaker, computer screen, keyboard, mouse.
 
-- Orchid & Pothos plant models (`../plants/orchid.glb`, `../plants/pothos.glb`)
+- Pothos plant model (`../plants/pothos.glb`)
   Generated in-house with Blender 5.1 via `scripts/make_plants.py` (procedural, no external assets).
+  (The orchid GLB was retired — `Orchid.tsx` uses the hand-tuned three.js version instead.)
   Regenerate: `/Applications/Blender.app/Contents/MacOS/Blender --background --python scripts/make_plants.py`
+
+- Black cat body parts (`../cat.glb`)
+  Generated in-house with Blender 5.1 via `scripts/make_cat.py` (lofted subdivision surfaces, no external assets).
+  Split by animation pivot: body / head (ears attached) / leg_front / leg_hind; eyes, nose,
+  whiskers and tail remain procedural in `src/site/room/objects/Cat.tsx`.
+  Regenerate: `/Applications/Blender.app/Contents/MacOS/Blender --background --python scripts/make_cat.py`
 
 ## Notes
 

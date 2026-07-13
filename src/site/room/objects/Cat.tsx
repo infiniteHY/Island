@@ -1,15 +1,18 @@
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
-import { Html } from "@react-three/drei";
-import { useRef, useState, type MutableRefObject } from "react";
+import { Html, useGLTF } from "@react-three/drei";
+import { useMemo, useRef, useState, type MutableRefObject } from "react";
 import * as THREE from "three";
 import { useRoomStore } from "../roomStore";
 
 /**
- * 黑猫：程序化建模，绿眼粉鼻。
- * 点击地板任意位置它会走过去——走路时身体起伏、脊背轻摆、
+ * 黑猫：躯干/四腿是 Blender 放样细分曲面（scripts/make_cat.py 导出的 cat.glb，
+ * 部件顶点以各自动画枢轴为原点）；头、眼睛、鼻、嘴线、胡须、尾巴链仍为
+ * 程序化生成。点击地板任意位置它会走过去——走路时身体起伏、脊背轻摆、
  * 头部随步伐点动、多节尾巴呈波浪摇晃，追求柔软的猫步质感。
- * 点击猫本身它会抬头看你。
+ * 点击猫本身它会抬头看你。改身形请改脚本重新导出。
  */
+
+const CAT_URL = "/assets/room/cat.glb";
 
 /** 可行走范围（避开书桌 / 边柜 / 书柜 / 盆栽落地灯，右侧收窄避开蝴蝶兰） */
 const WALK = { minX: -2.35, maxX: 1.85, minZ: -0.55, maxZ: 2.6 };
@@ -88,6 +91,25 @@ export function Cat({ reducedMotion }: { reducedMotion: boolean }) {
   const focus = useRoomStore((state) => state.focus);
   const [greeting, setGreeting] = useState(false);
   const [hint, setHint] = useState(true);
+
+  const { scene } = useGLTF(CAT_URL);
+  /** 按名字取出部件克隆（腿左右对称，前/后腿各克隆两份挂到四个髋点） */
+  const parts = useMemo(() => {
+    const take = (name: string) => {
+      const node = scene.getObjectByName(name);
+      if (!node) throw new Error(`cat.glb missing part: ${name}`);
+      const clone = node.clone(true);
+      clone.position.set(0, 0, 0);
+      clone.traverse((child) => {
+        if (child instanceof THREE.Mesh) child.castShadow = true;
+      });
+      return clone;
+    };
+    return {
+      body: take("body"),
+      legs: [take("leg_front"), take("leg_front"), take("leg_hind"), take("leg_hind")]
+    };
+  }, [scene]);
 
   useFrame((state, delta) => {
     const cat = catRef.current;
@@ -188,22 +210,10 @@ export function Cat({ reducedMotion }: { reducedMotion: boolean }) {
         }}
       >
         <group ref={bodyRef}>
-          {/* 身体：黑色主体（沿 z 拉长）+ 微亮的肩胛 */}
-          <mesh position={[0, 0.16, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-            <capsuleGeometry args={[0.085, 0.2, 6, 14]} />
-            <meshStandardMaterial color={BLACK} roughness={0.75} />
-          </mesh>
-          <mesh position={[0, 0.21, 0.07]} scale={[1, 0.65, 1.15]} castShadow>
-            <sphereGeometry args={[0.06, 12, 10]} />
-            <meshStandardMaterial color={BLACK_SOFT} roughness={0.72} />
-          </mesh>
-          {/* 臀部微隆起 */}
-          <mesh position={[0, 0.19, -0.1]} scale={[1, 0.8, 1.1]} castShadow>
-            <sphereGeometry args={[0.07, 12, 10]} />
-            <meshStandardMaterial color={BLACK} roughness={0.75} />
-          </mesh>
+          {/* 身体：Blender 放样细分曲面（深胸/收腰/圆臀，顶点以猫组原点为枢轴） */}
+          <primitive object={parts.body} />
 
-          {/* 头部组 */}
+          {/* 头部组：程序化颅面 + 耳朵 + 眼鼻嘴须 */}
           <group ref={headRef} position={[0, 0.27, 0.16]}>
             <mesh castShadow>
               <sphereGeometry args={[0.078, 14, 12]} />
@@ -277,7 +287,7 @@ export function Cat({ reducedMotion }: { reducedMotion: boolean }) {
             )}
           </group>
 
-          {/* 四条腿（对角摆动） */}
+          {/* 四条腿：GLB 连续锥柱（前/后腿各两份克隆），髋点即枢轴，对角摆动 */}
           {[
             { x: 0.05, z: 0.1 },
             { x: -0.05, z: 0.1 },
@@ -291,14 +301,7 @@ export function Cat({ reducedMotion }: { reducedMotion: boolean }) {
                 legRefs.current[i] = node;
               }}
             >
-              <mesh position={[0, -0.055, 0]} castShadow>
-                <cylinderGeometry args={[0.017, 0.02, 0.11, 8]} />
-                <meshStandardMaterial color={BLACK} roughness={0.75} />
-              </mesh>
-              <mesh position={[0, -0.108, 0.006]} scale={[1, 0.6, 1.2]}>
-                <sphereGeometry args={[0.02, 8, 6]} />
-                <meshStandardMaterial color={BLACK_SOFT} roughness={0.7} />
-              </mesh>
+              <primitive object={parts.legs[i]} />
             </group>
           ))}
 
@@ -324,3 +327,5 @@ export function Cat({ reducedMotion }: { reducedMotion: boolean }) {
     </group>
   );
 }
+
+useGLTF.preload(CAT_URL);

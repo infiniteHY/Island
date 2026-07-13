@@ -2,9 +2,9 @@
 // 用法: SHOTS='[{"out":"/tmp/room.png"}]' PORT=5173 node scripts/shot-room.mjs
 import puppeteer from "puppeteer-core";
 
-const PORT = process.env.PORT || "5173";
+const PORT = process.env.PORT || "5174";
 const DPR = Number(process.env.DPR || 1);
-const shots = JSON.parse(process.env.SHOTS || '[{"out":"/tmp/room-overview.png"}]');
+const shots = JSON.parse(process.env.SHOTS || '[{"wait":1200,"out":"/tmp/room-overview.png"}]');
 
 const browser = await puppeteer.launch({
   executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
@@ -25,7 +25,13 @@ for (const s of shots) {
     await new Promise((r) => setTimeout(r, s.settle ?? 2200));
   }
   if (s.out) {
-    await page.screenshot({ path: s.out, clip: s.clip });
+    let clip = s.clip;
+    if (clip) {
+      // clip 传视口坐标；puppeteer 的 clip 需要文档坐标，补上滚动偏移
+      const scrollY = await page.evaluate(() => window.scrollY);
+      clip = { ...clip, y: clip.y + scrollY };
+    }
+    await page.screenshot({ path: s.out, clip });
     console.log("saved", s.out);
   }
   if (s.esc) {
