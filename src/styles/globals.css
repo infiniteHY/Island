@@ -51,6 +51,7 @@
   --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
 
   --gutter: clamp(16px, 4vw, 56px);
+  --site-header-height: 58px;
 }
 
 .dark {
@@ -79,7 +80,7 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 58px;
+  scroll-padding-top: var(--site-header-height);
 }
 
 body {
@@ -129,7 +130,7 @@ a {
 /* ---------- header ---------- */
 
 .site {
-  padding-top: 58px;
+  padding-top: var(--site-header-height);
 }
 
 .site-header {
@@ -139,6 +140,7 @@ a {
   right: 0;
   z-index: 50;
   display: flex;
+  min-height: var(--site-header-height);
   align-items: center;
   gap: clamp(16px, 3vw, 40px);
   padding: 14px var(--gutter);
@@ -338,10 +340,12 @@ a {
 .bottle-label {
   min-width: 132px;
   padding: 8px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.48);
-  background: rgba(var(--bg-deep), 0.76);
+  border: 1px solid color-mix(in srgb, var(--item-body, var(--accent)) 58%, transparent);
+  background: color-mix(in srgb, var(--item-accent, var(--accent)) 18%, rgba(var(--bg-deep), 0.88));
   color: var(--label-1);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
+  box-shadow:
+    4px 4px 0 color-mix(in srgb, var(--item-accent, var(--accent)) 24%, transparent),
+    0 12px 32px rgba(0, 0, 0, 0.12);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
@@ -355,6 +359,7 @@ a {
 
 .bottle-label strong {
   font-size: 0.76rem;
+  color: color-mix(in srgb, var(--item-body, var(--accent)) 72%, var(--label-1));
 }
 
 .bottle-label span {
@@ -626,6 +631,7 @@ a {
 
 .work {
   position: relative;
+  min-height: calc(100svh - var(--site-header-height));
   padding: clamp(48px, 8vh, 96px) var(--gutter);
   border-top: 1px var(--rule-style) var(--line);
   overflow: hidden;
@@ -861,7 +867,7 @@ a.work-panel:hover .work-title {
 
 .room-section {
   position: relative;
-  min-height: calc(100svh - 58px);
+  min-height: calc(100svh - var(--site-header-height));
   padding: 0;
   border-top: 1px var(--rule-style) var(--line);
   overflow: hidden;
@@ -896,7 +902,7 @@ a.work-panel:hover .work-title {
 .room-stage {
   position: relative;
   width: 100%;
-  height: calc(100svh - 58px);
+  height: calc(100svh - var(--site-header-height) - 1px);
   min-height: 640px;
   overflow: hidden;
   border: 0;
@@ -1037,7 +1043,7 @@ a.work-panel:hover .work-title {
 
 @media (max-width: 1023px) {
   .room-stage {
-    height: calc(100svh - 58px);
+    height: calc(100svh - var(--site-header-height) - 1px);
     min-height: 560px;
   }
 }
@@ -1065,6 +1071,12 @@ a.work-panel:hover .work-title {
 }
 
 /* ---------- cta ---------- */
+
+.closing-screen {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-height: calc(100svh - var(--site-header-height));
+}
 
 .cta {
   position: relative;
@@ -1600,12 +1612,16 @@ a.work-panel:hover .work-title {
 }
 
 @media (max-width: 640px) {
+  :root {
+    --site-header-height: 54px;
+  }
+
   .site {
-    padding-top: 54px;
+    padding-top: var(--site-header-height);
   }
 
   html {
-    scroll-padding-top: 54px;
+    scroll-padding-top: var(--site-header-height);
   }
 
   .site-header {
@@ -1706,8 +1722,7 @@ a.work-panel:hover .work-title {
 }
 
 /* 分区线交点 + 十字标记(zed 工程图纸) */
-.modules::before,
-.cta::before {
+.modules::before {
   content: "+";
   position: absolute;
   top: -0.72em;

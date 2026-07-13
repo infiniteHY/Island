@@ -1,242 +1,383 @@
 import { useMemo } from "react";
 import * as THREE from "three";
 
-/**
- * 蝴蝶兰盆栽：白瓷釉盆 + 水苔 + 宽厚肉质叶基生莲座 +
- * 两支沿曲线拱起的花剑（TubeGeometry）+ 绿色支撑杆与卡扣 +
- * 白瓣紫芯的蝴蝶兰花朵（3 萼片 / 2 大瓣 / 唇瓣 / 蕊柱）与待放花苞。
- */
+const PETAL_WHITE = "#fffaf4";
+const SEPAL_WHITE = "#f2ebe4";
+const VEIN_PINK = "#d6a7bd";
+const LIP_MAGENTA = "#a72f78";
+const LIP_DARK = "#6f194f";
+const COLUMN_YELLOW = "#efcf72";
+const LEAF_DARK = "#28533a";
+const LEAF_LIGHT = "#39704b";
+const STEM_GREEN = "#557846";
 
-const PETAL_WHITE = "#f7f3ec";
-const SEPAL_WHITE = "#efe9df";
-const LIP_MAGENTA = "#a83a7f";
-const COLUMN_YELLOW = "#e3bd5a";
-const LEAF_GREEN = "#3f6b3c";
-const LEAF_GREEN_LIGHT = "#4d7d47";
-const STEM_GREEN = "#5a7a42";
+type Point = [number, number, number];
 
-/** 单朵蝴蝶兰（朝 +z），直径约 0.08——花瓣压成薄片贴合真实平展形态 */
-function Blossom({
-  position,
+function createPetalGeometry(width: number, length: number, cup: number, curl: number, ruffle = 0) {
+  const columns = 16;
+  const rows = 14;
+  const positions: number[] = [];
+  const uvs: number[] = [];
+  const indices: number[] = [];
+
+  for (let row = 0; row <= rows; row += 1) {
+    const t = row / rows;
+    const widthProfile = Math.pow(Math.sin(Math.PI * Math.pow(t, 0.92)), 0.62) * (0.84 + t * 0.16);
+    for (let column = 0; column <= columns; column += 1) {
+      const u = column / columns;
+      const across = u * 2 - 1;
+      const x = across * width * widthProfile;
+      const y = length * t;
+      const edgeWave = Math.sin(across * Math.PI * 3.5 + t * 5) * ruffle * Math.pow(t, 1.4);
+      const z = cup * Math.sin(Math.PI * t) * (1 - across * across) + curl * t * t + edgeWave;
+      positions.push(x, y, z);
+      uvs.push(u, t);
+    }
+  }
+
+  for (let row = 0; row < rows; row += 1) {
+    for (let column = 0; column < columns; column += 1) {
+      const a = row * (columns + 1) + column;
+      const b = a + columns + 1;
+      indices.push(a, b, a + 1, b, b + 1, a + 1);
+    }
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
+  geometry.setIndex(indices);
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
+function createLeafGeometry(length: number, width: number, arch: number, droop: number, twist: number) {
+  const columns = 14;
+  const rows = 20;
+  const positions: number[] = [];
+  const indices: number[] = [];
+
+  for (let row = 0; row <= rows; row += 1) {
+    const t = row / rows;
+    const widthProfile = Math.pow(Math.sin(Math.PI * Math.pow(t, 0.82)), 0.55) * (1 - t * 0.13);
+    for (let column = 0; column <= columns; column += 1) {
+      const across = column / columns * 2 - 1;
+      const x = length * t;
+      const z = across * width * widthProfile;
+      const centerCurve = arch * Math.sin(Math.PI * t) - droop * t * t;
+      const centralGroove = -Math.abs(across) * 0.012 * Math.sin(Math.PI * t);
+      const y = centerCurve + centralGroove + twist * across * t;
+      positions.push(x, y, z);
+    }
+  }
+
+  for (let row = 0; row < rows; row += 1) {
+    for (let column = 0; column < columns; column += 1) {
+      const a = row * (columns + 1) + column;
+      const b = a + columns + 1;
+      indices.push(a, a + 1, b, b, a + 1, b + 1);
+    }
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setIndex(indices);
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
+const WING_PETAL = createPetalGeometry(0.04, 0.07, 0.009, 0.006, 0.0014);
+const DORSAL_SEPAL = createPetalGeometry(0.023, 0.062, 0.007, -0.004, 0.0005);
+const SIDE_SEPAL = createPetalGeometry(0.021, 0.066, 0.005, -0.007, 0.0004);
+const LIP_CENTER = createPetalGeometry(0.014, 0.038, 0.009, 0.018, 0.0018);
+const LIP_SIDE = createPetalGeometry(0.01, 0.027, 0.007, 0.005, 0.001);
+
+function Petal({
+  geometry,
   rotation,
-  scale = 1
+  z = 0,
+  color,
+  vein = false
 }: {
-  position: [number, number, number];
-  rotation: [number, number, number];
-  scale?: number;
+  geometry: THREE.BufferGeometry;
+  rotation: Point;
+  z?: number;
+  color: string;
+  vein?: boolean;
 }) {
   return (
-    <group position={position} rotation={rotation} scale={scale}>
-      {/* 3 片萼片：上 / 左下 / 右下，窄长薄片、略向后仰 */}
-      {[Math.PI / 2, Math.PI / 2 + (Math.PI * 2) / 3, Math.PI / 2 - (Math.PI * 2) / 3].map((angle, i) => (
-        <mesh
-          key={i}
-          position={[Math.cos(angle) * 0.028, Math.sin(angle) * 0.028, -0.006]}
-          rotation={[-0.15, 0, angle - Math.PI / 2]}
-          scale={[0.62, 1.25, 0.14]}
-          castShadow
-        >
-          <sphereGeometry args={[0.021, 10, 8]} />
-          <meshStandardMaterial color={SEPAL_WHITE} roughness={0.6} side={THREE.DoubleSide} />
-        </mesh>
-      ))}
-      {/* 2 片大花瓣：左右如蝶翼，宽圆薄片、微前倾 */}
-      {[-1, 1].map((side) => (
-        <mesh
-          key={side}
-          position={[side * 0.031, 0.008, 0]}
-          rotation={[0.1, side * -0.18, side * 0.3]}
-          scale={[1.35, 1.05, 0.14]}
-          castShadow
-        >
-          <sphereGeometry args={[0.026, 12, 10]} />
-          <meshStandardMaterial color={PETAL_WHITE} roughness={0.5} side={THREE.DoubleSide} />
-        </mesh>
-      ))}
-      {/* 唇瓣：紫红三裂——中裂片前伸下弯 + 两侧小裂片上翘 */}
-      <mesh position={[0, -0.016, 0.01]} rotation={[0.85, 0, 0]} scale={[0.6, 1.1, 0.3]}>
-        <sphereGeometry args={[0.012, 8, 6]} />
-        <meshStandardMaterial color={LIP_MAGENTA} roughness={0.45} />
+    <group rotation={rotation} position={[0, 0, z]}>
+      <mesh geometry={geometry} castShadow>
+        <meshPhysicalMaterial
+          color={color}
+          roughness={0.48}
+          sheen={0.32}
+          sheenColor="#ffffff"
+          clearcoat={0.08}
+          side={THREE.DoubleSide}
+        />
       </mesh>
-      {[-1, 1].map((side) => (
-        <mesh
-          key={side}
-          position={[side * 0.01, -0.011, 0.008]}
-          rotation={[0.2, 0, side * 1.0]}
-          scale={[0.5, 1, 0.25]}
-        >
-          <sphereGeometry args={[0.008, 6, 5]} />
-          <meshStandardMaterial color={LIP_MAGENTA} roughness={0.45} />
+      {vein ? (
+        <mesh position={[0, 0.035, 0.006]} scale={[0.22, 1, 0.18]}>
+          <sphereGeometry args={[0.008, 7, 5]} />
+          <meshStandardMaterial color={VEIN_PINK} transparent opacity={0.38} roughness={0.65} />
         </mesh>
-      ))}
-      {/* 蕊柱：中心黄芯 + 唇瓣喉部红斑 */}
-      <mesh position={[0, -0.003, 0.012]}>
-        <sphereGeometry args={[0.0055, 6, 5]} />
-        <meshStandardMaterial color={COLUMN_YELLOW} roughness={0.4} />
-      </mesh>
-      <mesh position={[0, -0.009, 0.011]} scale={[1, 0.6, 0.5]}>
-        <sphereGeometry args={[0.004, 6, 5]} />
-        <meshStandardMaterial color="#7c2a55" roughness={0.5} />
-      </mesh>
+      ) : null}
     </group>
   );
 }
 
-/** 单支花剑：曲线茎 + 沿茎上段分布的花与顶端花苞 */
+/** 一朵白花红心蝴蝶兰：五片花被、三裂唇瓣、蕊柱、花粉块与后方子房。 */
+function Blossom({ position, rotation, scale = 1 }: { position: Point; rotation: Point; scale?: number }) {
+  return (
+    <group position={position} rotation={rotation} scale={scale}>
+      <mesh position={[0, 0, -0.023]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+        <capsuleGeometry args={[0.006, 0.032, 5, 8]} />
+        <meshStandardMaterial color="#76945b" roughness={0.72} />
+      </mesh>
+
+      <Petal geometry={DORSAL_SEPAL} rotation={[0.12, 0, 0]} z={-0.004} color={SEPAL_WHITE} />
+      <Petal geometry={SIDE_SEPAL} rotation={[-0.08, 0.12, 2.14]} z={-0.006} color={SEPAL_WHITE} />
+      <Petal geometry={SIDE_SEPAL} rotation={[-0.08, -0.12, -2.14]} z={-0.006} color={SEPAL_WHITE} />
+
+      <Petal geometry={WING_PETAL} rotation={[0.04, -0.14, 1.08]} z={0.002} color={PETAL_WHITE} vein />
+      <Petal geometry={WING_PETAL} rotation={[0.04, 0.14, -1.08]} z={0.002} color={PETAL_WHITE} vein />
+
+      {/* 唇瓣与花蕊位于花冠正面中央，整体前移，避免从远景看成吊在花底。 */}
+      <group position={[0, 0.012, 0.014]}>
+        <Petal geometry={LIP_SIDE} rotation={[0.18, -0.35, 2.38]} z={0.013} color={LIP_MAGENTA} />
+        <Petal geometry={LIP_SIDE} rotation={[0.18, 0.35, -2.38]} z={0.013} color={LIP_MAGENTA} />
+        <Petal geometry={LIP_CENTER} rotation={[0.42, 0, Math.PI]} z={0.016} color={LIP_MAGENTA} />
+
+        <mesh position={[0, 0.002, 0.03]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+          <capsuleGeometry args={[0.0065, 0.013, 5, 8]} />
+          <meshStandardMaterial color={COLUMN_YELLOW} roughness={0.42} />
+        </mesh>
+        <mesh position={[0, -0.007, 0.032]} scale={[1.1, 0.68, 0.55]}>
+          <sphereGeometry args={[0.006, 8, 6]} />
+          <meshStandardMaterial color={LIP_DARK} roughness={0.55} />
+        </mesh>
+        {[-0.004, 0.004].map((x) => (
+          <mesh key={x} position={[x, 0.009, 0.037]}>
+            <sphereGeometry args={[0.0024, 6, 5]} />
+            <meshStandardMaterial color="#f0d76f" roughness={0.4} />
+          </mesh>
+        ))}
+      </group>
+    </group>
+  );
+}
+
+function Tube({ points, radius, color }: { points: THREE.Vector3[]; radius: number; color: string }) {
+  const geometry = useMemo(() => {
+    const curve = new THREE.CatmullRomCurve3(points);
+    return new THREE.TubeGeometry(curve, Math.max(6, points.length * 5), radius, 7, false);
+  }, [points, radius]);
+
+  return (
+    <mesh geometry={geometry} castShadow>
+      <meshStandardMaterial color={color} roughness={0.72} />
+    </mesh>
+  );
+}
+
+function Pedicel({ from, to }: { from: THREE.Vector3; to: Point }) {
+  const points = useMemo(() => {
+    const end = new THREE.Vector3(...to);
+    const middle = from.clone().lerp(end, 0.55);
+    middle.y += 0.008;
+    return [from, middle, end];
+  }, [from, to]);
+  return <Tube points={points} radius={0.0028} color="#6d8a50" />;
+}
+
+function Bud({ position, scale = 1, rotation = [0, 0, 0] }: { position: Point; scale?: number; rotation?: Point }) {
+  return (
+    <group position={position} rotation={rotation} scale={scale}>
+      <mesh scale={[0.72, 1.15, 0.72]} castShadow>
+        <sphereGeometry args={[0.017, 12, 9]} />
+        <meshPhysicalMaterial color="#eef0d8" roughness={0.52} sheen={0.2} />
+      </mesh>
+      {[0, 2.1, 4.2].map((angle) => (
+        <mesh key={angle} position={[Math.cos(angle) * 0.008, -0.014, Math.sin(angle) * 0.008]} rotation={[0, angle, 0.35]}>
+          <coneGeometry args={[0.008, 0.024, 6]} />
+          <meshStandardMaterial color="#78905b" roughness={0.75} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+type Flower = { t: number; out: Point; face: Point; scale?: number };
+type BudData = { t: number; out: Point; scale?: number };
+
 function FlowerSpike({
   points,
-  blossoms,
+  flowers,
   buds,
   stake
 }: {
-  points: [number, number, number][];
-  blossoms: { t: number; out: [number, number, number]; face: [number, number, number]; scale?: number }[];
-  buds: { t: number; out: [number, number, number] }[];
-  stake: { x: number; z: number; height: number; lean: [number, number] };
+  points: Point[];
+  flowers: Flower[];
+  buds: BudData[];
+  stake: { x: number; z: number; height: number; lean: number };
 }) {
-  const { tube, curve } = useMemo(() => {
-    const c = new THREE.CatmullRomCurve3(points.map((p) => new THREE.Vector3(...p)));
-    return { tube: new THREE.TubeGeometry(c, 24, 0.0045, 6, false), curve: c };
-  }, [points]);
+  const curve = useMemo(() => new THREE.CatmullRomCurve3(points.map((point) => new THREE.Vector3(...point))), [points]);
+  const stemPoints = useMemo(() => Array.from({ length: 18 }, (_, index) => curve.getPoint(index / 17)), [curve]);
 
   return (
     <group>
-      <mesh geometry={tube} castShadow>
-        <meshStandardMaterial color={STEM_GREEN} roughness={0.7} />
+      <Tube points={stemPoints} radius={0.0042} color={STEM_GREEN} />
+      <mesh position={[stake.x, stake.height / 2 + 0.29, stake.z]} rotation={[0, 0, stake.lean]} castShadow>
+        <cylinderGeometry args={[0.0032, 0.0038, stake.height, 7]} />
+        <meshStandardMaterial color="#587044" roughness={0.78} />
       </mesh>
-      {/* 绿色支撑杆 + 顶端卡扣 */}
-      <mesh
-        position={[stake.x, stake.height / 2, stake.z]}
-        rotation={[stake.lean[0], 0, stake.lean[1]]}
-        castShadow
-      >
-        <cylinderGeometry args={[0.004, 0.004, stake.height, 6]} />
-        <meshStandardMaterial color="#4c6b3a" roughness={0.6} />
-      </mesh>
-      <mesh position={[stake.x + stake.lean[1] * -stake.height * 0.5, stake.height * 0.96, stake.z]}>
-        <torusGeometry args={[0.011, 0.004, 6, 10]} />
-        <meshStandardMaterial color="#7d9459" roughness={0.6} />
-      </mesh>
-      {blossoms.map(({ t, out, face, scale }, i) => {
-        const p = curve.getPoint(t);
+      {[0.48, 0.72].map((ratio) => (
+        <mesh key={ratio} position={[stake.x - stake.lean * stake.height * (ratio - 0.5), 0.29 + stake.height * ratio, stake.z]}>
+          <torusGeometry args={[0.009, 0.0026, 5, 10, Math.PI * 1.55]} />
+          <meshStandardMaterial color="#829663" roughness={0.68} />
+        </mesh>
+      ))}
+
+      {flowers.map(({ t, out, face, scale }, index) => {
+        const origin = curve.getPoint(t);
+        const target: Point = [origin.x + out[0], origin.y + out[1], origin.z + out[2]];
         return (
-          <Blossom
-            key={i}
-            position={[p.x + out[0], p.y + out[1], p.z + out[2]]}
-            rotation={face}
-            scale={scale ?? 1}
-          />
+          <group key={`flower-${index}`}>
+            <Pedicel from={origin} to={target} />
+            <Blossom position={target} rotation={face} scale={scale} />
+          </group>
         );
       })}
-      {buds.map(({ t, out }, i) => {
-        const p = curve.getPoint(t);
+
+      {buds.map(({ t, out, scale }, index) => {
+        const origin = curve.getPoint(t);
+        const target: Point = [origin.x + out[0], origin.y + out[1], origin.z + out[2]];
         return (
-          <mesh key={i} position={[p.x + out[0], p.y + out[1], p.z + out[2]]} castShadow>
-            <sphereGeometry args={[0.011 - i * 0.002, 8, 6]} />
-            <meshStandardMaterial color="#cfd8b4" roughness={0.6} />
-          </mesh>
+          <group key={`bud-${index}`}>
+            <Pedicel from={origin} to={target} />
+            <Bud position={target} scale={scale} rotation={[0.2, 0, -0.55]} />
+          </group>
         );
       })}
     </group>
   );
 }
 
-export function Orchid({ position }: { position: [number, number, number] }) {
+function OrchidLeaf({ length, width, rotation, arch, droop, twist, color }: {
+  length: number;
+  width: number;
+  rotation: number;
+  arch: number;
+  droop: number;
+  twist: number;
+  color: string;
+}) {
+  const geometry = useMemo(
+    () => createLeafGeometry(length, width, arch, droop, twist),
+    [arch, droop, length, twist, width]
+  );
+  const midribPoints = useMemo(
+    () => Array.from({ length: 9 }, (_, index) => {
+      const t = index / 8;
+      return new THREE.Vector3(length * t, arch * Math.sin(Math.PI * t) - droop * t * t + 0.004, 0);
+    }),
+    [arch, droop, length]
+  );
+
+  return (
+    <group position={[0, 0.305, 0]} rotation={[0, rotation, 0]}>
+      <mesh geometry={geometry} castShadow receiveShadow>
+        <meshPhysicalMaterial color={color} roughness={0.5} clearcoat={0.16} clearcoatRoughness={0.62} side={THREE.DoubleSide} />
+      </mesh>
+      <Tube points={midribPoints} radius={0.0018} color="#739063" />
+    </group>
+  );
+}
+
+/** 纯 Three.js 程序化蝴蝶兰盆栽。 */
+export function Orchid({ position }: { position: Point }) {
+  const leaves = [
+    { rotation: 0.18, length: 0.38, width: 0.065, arch: 0.055, droop: 0.115, twist: 0.012 },
+    { rotation: 1.2, length: 0.43, width: 0.072, arch: 0.07, droop: 0.14, twist: -0.012 },
+    { rotation: 2.35, length: 0.34, width: 0.062, arch: 0.05, droop: 0.1, twist: 0.015 },
+    { rotation: 3.36, length: 0.41, width: 0.07, arch: 0.062, droop: 0.135, twist: -0.01 },
+    { rotation: 4.5, length: 0.36, width: 0.064, arch: 0.05, droop: 0.11, twist: 0.012 },
+    { rotation: 5.55, length: 0.31, width: 0.056, arch: 0.045, droop: 0.09, twist: -0.008 }
+  ];
+
   return (
     <group position={position}>
-      {/* 白瓷釉盆：束腰曲线 + 圆唇口 + 底足 */}
-      <mesh position={[0, 0.16, 0]} castShadow>
-        <cylinderGeometry args={[0.13, 0.095, 0.26, 22]} />
-        <meshStandardMaterial color="#f0ece4" roughness={0.25} metalness={0.05} />
+      <mesh position={[0, 0.155, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[0.135, 0.098, 0.27, 32]} />
+        <meshPhysicalMaterial color="#f4f0e9" roughness={0.22} clearcoat={0.42} clearcoatRoughness={0.18} />
       </mesh>
-      <mesh position={[0, 0.29, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.128, 0.012, 10, 24]} />
-        <meshStandardMaterial color="#f4f0e8" roughness={0.22} metalness={0.05} />
+      <mesh position={[0, 0.292, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.127, 0.011, 10, 32]} />
+        <meshPhysicalMaterial color="#fbf8f2" roughness={0.2} clearcoat={0.45} />
       </mesh>
-      <mesh position={[0, 0.028, 0]} castShadow>
-        <cylinderGeometry args={[0.1, 0.105, 0.05, 22]} />
-        <meshStandardMaterial color="#e6e1d7" roughness={0.3} />
-      </mesh>
-      {/* 盆口水苔 */}
       <mesh position={[0, 0.285, 0]}>
-        <cylinderGeometry args={[0.118, 0.118, 0.02, 20]} />
-        <meshStandardMaterial color="#6b5a3e" roughness={0.95} />
+        <cylinderGeometry args={[0.118, 0.116, 0.018, 28]} />
+        <meshStandardMaterial color="#6a5439" roughness={0.96} />
       </mesh>
+      {Array.from({ length: 14 }, (_, index) => {
+        const angle = index * 2.399;
+        const radius = 0.025 + (index % 4) * 0.021;
+        return (
+          <mesh key={index} position={[Math.cos(angle) * radius, 0.298 + (index % 3) * 0.003, Math.sin(angle) * radius]} rotation={[0, angle, 0]}>
+            <dodecahedronGeometry args={[0.013 + (index % 2) * 0.003, 0]} />
+            <meshStandardMaterial color={index % 3 === 0 ? "#8b7652" : "#665136"} roughness={1} />
+          </mesh>
+        );
+      })}
 
-      {/* 基生宽叶：6 片肉质带状叶低伏散开（压成薄片，尖端下垂，
-          贴合真实蝴蝶兰的对生莲座形态） */}
-      {[
-        { rot: 0.3, tilt: 1.22, len: 0.3, w: 1.0 },
-        { rot: 1.35, tilt: 1.1, len: 0.34, w: 1.1 },
-        { rot: 2.5, tilt: 1.28, len: 0.28, w: 0.95 },
-        { rot: 3.6, tilt: 1.05, len: 0.33, w: 1.05 },
-        { rot: 4.7, tilt: 1.25, len: 0.3, w: 1.0 },
-        { rot: 5.7, tilt: 1.14, len: 0.26, w: 0.9 }
-      ].map(({ rot, tilt, len, w }, i) => (
-        <group key={i} rotation={[0, rot, 0]} position={[0, 0.3, 0]}>
-          {/* 叶身：压扁的长椭球，沿伸出方向下弯 */}
-          <mesh
-            position={[len * 0.5, Math.cos(tilt) * len * 0.4, 0]}
-            rotation={[0, 0, -(tilt - Math.PI / 2)]}
-            scale={[len * 10, 0.32, w * 1.9]}
-            castShadow
-          >
-            <sphereGeometry args={[0.05, 14, 10]} />
-            <meshStandardMaterial color={i % 2 ? LEAF_GREEN : LEAF_GREEN_LIGHT} roughness={0.5} />
-          </mesh>
-          {/* 叶尖：下垂的小薄片，模拟叶端自然垂头 */}
-          <mesh
-            position={[len * 0.98, Math.cos(tilt) * len * 0.68 - 0.015, 0]}
-            rotation={[0, 0, -(tilt - Math.PI / 2) - 0.55]}
-            scale={[1.6, 0.28, w * 1.3]}
-            castShadow
-          >
-            <sphereGeometry args={[0.032, 10, 8]} />
-            <meshStandardMaterial color={i % 2 ? LEAF_GREEN : LEAF_GREEN_LIGHT} roughness={0.5} />
-          </mesh>
-        </group>
+      {leaves.map((leaf, index) => (
+        <OrchidLeaf key={index} {...leaf} color={index % 2 ? LEAF_DARK : LEAF_LIGHT} />
       ))}
 
-      {/* 花剑一：向右前方拱起，5 朵盛放 + 2 苞 */}
       <FlowerSpike
         points={[
-          [0.01, 0.3, 0.01],
-          [0.03, 0.5, 0.03],
-          [0.09, 0.68, 0.06],
-          [0.19, 0.78, 0.1],
-          [0.3, 0.8, 0.14]
+          [0.012, 0.3, 0.01],
+          [0.035, 0.56, 0.018],
+          [0.085, 0.82, 0.035],
+          [0.19, 1.04, 0.065],
+          [0.36, 1.17, 0.1]
         ]}
-        blossoms={[
-          { t: 0.52, out: [0.02, 0.015, 0.03], face: [0.25, 0.5, 0], scale: 0.92 },
-          { t: 0.64, out: [0.03, 0.02, 0.02], face: [0.2, 0.7, 0], scale: 1.0 },
-          { t: 0.76, out: [0.025, 0.025, 0.03], face: [0.35, 0.5, 0], scale: 1.05 },
-          { t: 0.87, out: [0.02, 0.02, 0.035], face: [0.45, 0.35, 0], scale: 1.0 },
-          { t: 0.96, out: [0.015, 0.015, 0.03], face: [0.55, 0.25, 0], scale: 0.9 }
+        flowers={[
+          { t: 0.38, out: [-0.018, 0.01, 0.04], face: [0.05, -0.1, 0.06], scale: 0.86 },
+          { t: 0.5, out: [0.025, 0.005, 0.035], face: [0.08, 0.12, -0.08], scale: 0.95 },
+          { t: 0.62, out: [-0.018, 0.018, 0.045], face: [0.04, -0.1, 0.07], scale: 1.04 },
+          { t: 0.74, out: [0.018, 0.022, 0.05], face: [0.1, 0.08, -0.04], scale: 1.08 },
+          { t: 0.84, out: [-0.012, 0.025, 0.048], face: [0.12, -0.08, 0.08], scale: 1.03 },
+          { t: 0.93, out: [0.014, 0.018, 0.042], face: [0.16, 0.05, -0.04], scale: 0.93 }
         ]}
         buds={[
-          { t: 0.99, out: [0.012, 0.01, 0.012] },
-          { t: 1, out: [0.024, 0.004, 0.02] }
+          { t: 0.975, out: [0.012, 0.018, 0.018], scale: 0.86 },
+          { t: 1, out: [0.028, 0.012, 0.014], scale: 0.68 }
         ]}
-        stake={{ x: 0.05, z: 0.03, height: 0.62, lean: [0.06, -0.12] }}
+        stake={{ x: 0.045, z: 0.005, height: 0.5, lean: -0.07 }}
       />
-      {/* 花剑二：向左后方低一点拱起，3 朵 + 2 苞 */}
+
       <FlowerSpike
         points={[
-          [-0.02, 0.3, -0.01],
-          [-0.05, 0.46, -0.04],
-          [-0.12, 0.58, -0.08],
-          [-0.21, 0.63, -0.11]
+          [-0.018, 0.3, -0.012],
+          [-0.045, 0.5, -0.02],
+          [-0.1, 0.69, -0.015],
+          [-0.21, 0.86, 0.01],
+          [-0.34, 0.93, 0.04]
         ]}
-        blossoms={[
-          { t: 0.55, out: [-0.025, 0.02, -0.02], face: [0.25, -2.3, 0], scale: 0.85 },
-          { t: 0.72, out: [-0.03, 0.02, -0.025], face: [0.3, -2.5, 0], scale: 0.95 },
-          { t: 0.88, out: [-0.025, 0.02, -0.03], face: [0.4, -2.7, 0], scale: 0.9 }
+        flowers={[
+          { t: 0.4, out: [0.022, 0.01, 0.04], face: [0.05, 0.1, -0.06], scale: 0.82 },
+          { t: 0.55, out: [-0.025, 0.012, 0.04], face: [0.08, -0.08, 0.08], scale: 0.9 },
+          { t: 0.7, out: [0.012, 0.02, 0.05], face: [0.05, 0.1, -0.06], scale: 1 },
+          { t: 0.83, out: [-0.018, 0.02, 0.048], face: [0.12, -0.1, 0.08], scale: 0.97 },
+          { t: 0.93, out: [0.01, 0.015, 0.04], face: [0.15, 0.08, -0.05], scale: 0.84 }
         ]}
         buds={[
-          { t: 0.97, out: [-0.012, 0.008, -0.01] },
-          { t: 1, out: [-0.022, 0.002, -0.018] }
+          { t: 0.98, out: [-0.012, 0.016, 0.018], scale: 0.76 },
+          { t: 1, out: [-0.026, 0.008, 0.012], scale: 0.58 }
         ]}
-        stake={{ x: -0.04, z: -0.03, height: 0.5, lean: [-0.05, 0.14] }}
+        stake={{ x: -0.038, z: -0.012, height: 0.4, lean: 0.08 }}
       />
     </group>
   );

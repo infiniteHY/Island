@@ -34,9 +34,11 @@ export function Site() {
         <BottleHero />
         <Work />
         <RoomSection />
-        <Cta />
       </main>
-      <Footer />
+      <div className="closing-screen">
+        <Cta />
+        <Footer />
+      </div>
     </div>
   );
 }

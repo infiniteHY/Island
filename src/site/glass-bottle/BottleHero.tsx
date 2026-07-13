@@ -4,7 +4,7 @@ import type { CSSProperties } from "react";
 import { Suspense, useEffect, useState } from "react";
 import { useSiteStore } from "../siteStore";
 import { BottleScene } from "./BottleScene";
-import { BOTTLE_ITEMS } from "./bottleItems";
+import { BOTTLE_NAV_ITEMS } from "./bottleItems";
 
 const titleLines = ["我的世界——", "Reading, Music, Bird."];
 
@@ -81,7 +81,7 @@ export function BottleHero() {
       </motion.div>
 
       <nav className="bottle-nav mono" aria-label="瓶中兴趣入口">
-        {BOTTLE_ITEMS.map((item) => (
+        {BOTTLE_NAV_ITEMS.map((item) => (
           <button
             type="button"
             key={item.id}
@@ -90,7 +90,7 @@ export function BottleHero() {
             onMouseLeave={() => setActiveId(null)}
             onFocus={() => setActiveId(item.id)}
             onBlur={() => setActiveId(null)}
-            style={{ "--item-accent": item.accent } as CSSProperties}
+            style={{ "--item-accent": item.uiAccent } as CSSProperties}
           >
             <span>{item.label}</span>
             <em>{item.subtitle}</em>

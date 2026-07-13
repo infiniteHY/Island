@@ -1,7 +1,9 @@
 import { Html } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
 import { RigidBody } from "@react-three/rapier";
 import gsap from "gsap";
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import * as THREE from "three";
 import type { RapierRigidBody } from "@react-three/rapier";
 import type { BottleItemConfig } from "./bottleItems";
@@ -33,6 +35,47 @@ export function BottleItem({ item, activeId, onActiveChange, reducedMotion, dela
   const [phase, setPhase] = useState<DropPhase>(reducedMotion ? "settled" : "waiting");
   const active = activeId === item.id || hovered;
   const finalPosition = useMemo(() => finalPositionFor(item.id), [item.id]);
+
+  useFrame(() => {
+    const body = bodyRef.current;
+    if (!body || phase !== "settled" || reducedMotion) return;
+
+    const position = body.translation();
+    const y = Math.max(-1.9, Math.min(1.68, position.y));
+    const radius = Math.hypot(position.x, position.z);
+    const safeRadius = Math.max(0.14, bottleRadiusAt(y) - 0.22);
+
+    if (position.y === y && radius <= safeRadius) return;
+
+    const radialScale = radius > safeRadius ? safeRadius / Math.max(radius, 0.0001) : 1;
+    body.setTranslation(
+      {
+        x: position.x * radialScale,
+        y,
+        z: position.z * radialScale
+      },
+      true
+    );
+
+    const velocity = body.linvel();
+    body.setLinvel(
+      {
+        x: velocity.x * 0.12,
+        y: position.y === y ? velocity.y * 0.35 : 0,
+        z: velocity.z * 0.12
+      },
+      true
+    );
+    const angularVelocity = body.angvel();
+    body.setAngvel(
+      {
+        x: angularVelocity.x * 0.35,
+        y: angularVelocity.y * 0.35,
+        z: angularVelocity.z * 0.35
+      },
+      true
+    );
+  });
 
   useEffect(() => {
     if (reducedMotion) {
@@ -135,9 +178,10 @@ export function BottleItem({ item, activeId, onActiveChange, reducedMotion, dela
       ref={bodyRef}
       type={reducedMotion ? "fixed" : "dynamic"}
       colliders="cuboid"
+      ccd
       position={finalPosition}
       rotation={item.rotation}
-      restitution={0.14}
+      restitution={0.04}
       friction={0.82}
       linearDamping={0.42}
       angularDamping={0.56}
@@ -204,7 +248,10 @@ export function BottleItem({ item, activeId, onActiveChange, reducedMotion, dela
         </group>
         {active ? (
           <Html position={[0, 0.42, 0]} center distanceFactor={7} className="bottle-label-wrap">
-            <div className="bottle-label">
+            <div
+              className="bottle-label"
+              style={{ "--item-accent": item.uiAccent, "--item-body": item.uiBody } as CSSProperties}
+            >
               <strong>{item.label}</strong>
               <span>{item.subtitle}</span>
             </div>
@@ -253,7 +300,10 @@ export function StaticBottleItem({
       </group>
       {active ? (
         <Html position={[0, 0.42, 0]} center distanceFactor={7} className="bottle-label-wrap">
-          <div className="bottle-label">
+          <div
+            className="bottle-label"
+            style={{ "--item-accent": item.uiAccent, "--item-body": item.uiBody } as CSSProperties}
+          >
             <strong>{item.label}</strong>
             <span>{item.subtitle}</span>
           </div>
@@ -273,6 +323,28 @@ function finalPositionFor(id: string): [number, number, number] {
     dumbbell: [0.34, -1.6, 0.0]
   };
   return positions[id] ?? [0, -1.4, 0];
+}
+
+function bottleRadiusAt(y: number) {
+  const profile: Array<[number, number]> = [
+    [-2.02, 0.72],
+    [-1.56, 0.86],
+    [-0.42, 0.92],
+    [0.62, 0.86],
+    [1.16, 0.68],
+    [1.52, 0.42],
+    [1.84, 0.3]
+  ];
+
+  for (let index = 1; index < profile.length; index += 1) {
+    const [previousY, previousRadius] = profile[index - 1];
+    const [nextY, nextRadius] = profile[index];
+    if (y > nextY) continue;
+    const progress = (y - previousY) / (nextY - previousY);
+    return previousRadius + (nextRadius - previousRadius) * Math.max(0, Math.min(1, progress));
+  }
+
+  return profile[profile.length - 1][1];
 }
 
 function ItemMesh({ item, active }: { item: BottleItemConfig; active: boolean }) {
