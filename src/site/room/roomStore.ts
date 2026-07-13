@@ -44,13 +44,13 @@ export const ROOM_OBJECT_META: Record<RoomFocusId, { label: string; subtitle: st
   },
   bookshelf: {
     label: "Bookshelf",
-    subtitle: "MY SHELF",
-    hint: "以后这里放我喜欢的书 · ESC 退出"
+    subtitle: "MY NOTES",
+    hint: "这里放我读过的书和笔记 · ESC 退出"
   },
   map: {
     label: "World Map",
     subtitle: "PLACES & DREAMS",
-    hint: "红钉去过 · 黄钉想去 · ESC 退出"
+    hint: "记录我旅行过的国家 · ESC 退出"
   },
   blackboard: {
     label: "Blackboard",

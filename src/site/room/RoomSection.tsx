@@ -38,9 +38,9 @@ export function RoomSection() {
     <section ref={sectionRef} id="room" className="room-section" aria-labelledby="room-title">
       <div className="section-head room-head">
         <div>
-          <p className="section-title">ROOM.LIVE // 一个可以坐下来的角落</p>
+          <p className="section-title">ROOM.LIVE</p>
           <h2 id="room-title" className="room-title">
-            这里像家。电脑里有游戏，唱片机里有歌，打字机上敲下的字，会寄到我手里。
+            一间自己的房间。
           </h2>
         </div>
       </div>
@@ -51,7 +51,7 @@ export function RoomSection() {
           shadows="soft"
           dpr={[1, 1.5]}
           camera={{ position: [3.0, 2.08, 3.55], fov: 50, near: 0.1, far: 40 }}
-          frameloop={inView || focus ? "always" : "demand"}
+          frameloop={inView || focus ? "always" : "never"}
         >
           <Suspense fallback={null}>
             <RoomScene reducedMotion={reducedMotion} />

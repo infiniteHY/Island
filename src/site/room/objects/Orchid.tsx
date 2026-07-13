@@ -1,3 +1,4 @@
+import { createInstances } from "@react-three/drei";
 import { useMemo } from "react";
 import * as THREE from "three";
 
@@ -91,37 +92,48 @@ const DORSAL_SEPAL = createPetalGeometry(0.023, 0.062, 0.007, -0.004, 0.0005);
 const SIDE_SEPAL = createPetalGeometry(0.021, 0.066, 0.005, -0.007, 0.0004);
 const LIP_CENTER = createPetalGeometry(0.014, 0.038, 0.009, 0.018, 0.0018);
 const LIP_SIDE = createPetalGeometry(0.01, 0.027, 0.007, 0.005, 0.001);
+const VEIN_GEOMETRY = new THREE.SphereGeometry(0.008, 7, 5);
+
+const [WingPetalInstances, WingPetalInstance] = createInstances();
+const [DorsalSepalInstances, DorsalSepalInstance] = createInstances();
+const [SideSepalInstances, SideSepalInstance] = createInstances();
+const [LipSideInstances, LipSideInstance] = createInstances();
+const [LipCenterInstances, LipCenterInstance] = createInstances();
+const [VeinInstances, VeinInstance] = createInstances();
+
+type PetalKind = "wing" | "dorsal" | "side-sepal" | "lip-side" | "lip-center";
 
 function Petal({
-  geometry,
+  kind,
   rotation,
   z = 0,
-  color,
   vein = false
 }: {
-  geometry: THREE.BufferGeometry;
+  kind: PetalKind;
   rotation: Point;
   z?: number;
-  color: string;
   vein?: boolean;
 }) {
+  const instance = (() => {
+    switch (kind) {
+      case "wing":
+        return <WingPetalInstance />;
+      case "dorsal":
+        return <DorsalSepalInstance />;
+      case "side-sepal":
+        return <SideSepalInstance />;
+      case "lip-side":
+        return <LipSideInstance />;
+      case "lip-center":
+        return <LipCenterInstance />;
+    }
+  })();
+
   return (
     <group rotation={rotation} position={[0, 0, z]}>
-      <mesh geometry={geometry} castShadow>
-        <meshPhysicalMaterial
-          color={color}
-          roughness={0.48}
-          sheen={0.32}
-          sheenColor="#ffffff"
-          clearcoat={0.08}
-          side={THREE.DoubleSide}
-        />
-      </mesh>
+      {instance}
       {vein ? (
-        <mesh position={[0, 0.035, 0.006]} scale={[0.22, 1, 0.18]}>
-          <sphereGeometry args={[0.008, 7, 5]} />
-          <meshStandardMaterial color={VEIN_PINK} transparent opacity={0.38} roughness={0.65} />
-        </mesh>
+        <VeinInstance position={[0, 0.035, 0.006]} scale={[0.22, 1, 0.18]} />
       ) : null}
     </group>
   );
@@ -136,18 +148,18 @@ function Blossom({ position, rotation, scale = 1 }: { position: Point; rotation:
         <meshStandardMaterial color="#76945b" roughness={0.72} />
       </mesh>
 
-      <Petal geometry={DORSAL_SEPAL} rotation={[0.12, 0, 0]} z={-0.004} color={SEPAL_WHITE} />
-      <Petal geometry={SIDE_SEPAL} rotation={[-0.08, 0.12, 2.14]} z={-0.006} color={SEPAL_WHITE} />
-      <Petal geometry={SIDE_SEPAL} rotation={[-0.08, -0.12, -2.14]} z={-0.006} color={SEPAL_WHITE} />
+      <Petal kind="dorsal" rotation={[0.12, 0, 0]} z={-0.004} />
+      <Petal kind="side-sepal" rotation={[-0.08, 0.12, 2.14]} z={-0.006} />
+      <Petal kind="side-sepal" rotation={[-0.08, -0.12, -2.14]} z={-0.006} />
 
-      <Petal geometry={WING_PETAL} rotation={[0.04, -0.14, 1.08]} z={0.002} color={PETAL_WHITE} vein />
-      <Petal geometry={WING_PETAL} rotation={[0.04, 0.14, -1.08]} z={0.002} color={PETAL_WHITE} vein />
+      <Petal kind="wing" rotation={[0.04, -0.14, 1.08]} z={0.002} vein />
+      <Petal kind="wing" rotation={[0.04, 0.14, -1.08]} z={0.002} vein />
 
       {/* 唇瓣与花蕊位于花冠正面中央，整体前移，避免从远景看成吊在花底。 */}
       <group position={[0, 0.012, 0.014]}>
-        <Petal geometry={LIP_SIDE} rotation={[0.18, -0.35, 2.38]} z={0.013} color={LIP_MAGENTA} />
-        <Petal geometry={LIP_SIDE} rotation={[0.18, 0.35, -2.38]} z={0.013} color={LIP_MAGENTA} />
-        <Petal geometry={LIP_CENTER} rotation={[0.42, 0, Math.PI]} z={0.016} color={LIP_MAGENTA} />
+        <Petal kind="lip-side" rotation={[0.18, -0.35, 2.38]} z={0.013} />
+        <Petal kind="lip-side" rotation={[0.18, 0.35, -2.38]} z={0.013} />
+        <Petal kind="lip-center" rotation={[0.42, 0, Math.PI]} z={0.016} />
 
         <mesh position={[0, 0.002, 0.03]} rotation={[Math.PI / 2, 0, 0]} castShadow>
           <capsuleGeometry args={[0.0065, 0.013, 5, 8]} />
@@ -296,7 +308,7 @@ function OrchidLeaf({ length, width, rotation, arch, droop, twist, color }: {
 }
 
 /** 纯 Three.js 程序化蝴蝶兰盆栽。 */
-export function Orchid({ position }: { position: Point }) {
+function OrchidModel({ position }: { position: Point }) {
   const leaves = [
     { rotation: 0.18, length: 0.38, width: 0.065, arch: 0.055, droop: 0.115, twist: 0.012 },
     { rotation: 1.2, length: 0.43, width: 0.072, arch: 0.07, droop: 0.14, twist: -0.012 },
@@ -380,5 +392,54 @@ export function Orchid({ position }: { position: Point }) {
         stake={{ x: -0.038, z: -0.012, height: 0.4, lean: 0.08 }}
       />
     </group>
+  );
+}
+
+/**
+ * 全株共享六组 InstancedMesh。花瓣仍保留各自的局部姿态，但相同几何与材质
+ * 只提交一次绘制，避免每朵花重复创建五套 mesh/material。
+ */
+export function Orchid({ position }: { position: Point }) {
+  return (
+    <WingPetalInstances geometry={WING_PETAL} limit={24} frames={2} castShadow frustumCulled={false}>
+      <meshPhysicalMaterial
+        color={PETAL_WHITE}
+        roughness={0.48}
+        sheen={0.32}
+        sheenColor="#ffffff"
+        clearcoat={0.08}
+        side={THREE.DoubleSide}
+      />
+      <DorsalSepalInstances geometry={DORSAL_SEPAL} limit={12} frames={2} castShadow frustumCulled={false}>
+        <meshPhysicalMaterial
+          color={SEPAL_WHITE}
+          roughness={0.48}
+          sheen={0.32}
+          sheenColor="#ffffff"
+          clearcoat={0.08}
+          side={THREE.DoubleSide}
+        />
+        <SideSepalInstances geometry={SIDE_SEPAL} limit={24} frames={2} castShadow frustumCulled={false}>
+          <meshPhysicalMaterial
+            color={SEPAL_WHITE}
+            roughness={0.48}
+            sheen={0.32}
+            sheenColor="#ffffff"
+            clearcoat={0.08}
+            side={THREE.DoubleSide}
+          />
+          <LipSideInstances geometry={LIP_SIDE} limit={24} frames={2} castShadow frustumCulled={false}>
+            <meshPhysicalMaterial color={LIP_MAGENTA} roughness={0.48} sheen={0.22} side={THREE.DoubleSide} />
+            <LipCenterInstances geometry={LIP_CENTER} limit={12} frames={2} castShadow frustumCulled={false}>
+              <meshPhysicalMaterial color={LIP_MAGENTA} roughness={0.48} sheen={0.22} side={THREE.DoubleSide} />
+              <VeinInstances geometry={VEIN_GEOMETRY} limit={24} frames={2} frustumCulled={false}>
+                <meshStandardMaterial color={VEIN_PINK} transparent opacity={0.38} roughness={0.65} />
+                <OrchidModel position={position} />
+              </VeinInstances>
+            </LipCenterInstances>
+          </LipSideInstances>
+        </SideSepalInstances>
+      </DorsalSepalInstances>
+    </WingPetalInstances>
   );
 }

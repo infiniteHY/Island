@@ -18,7 +18,7 @@ export const BOTTLE_ITEMS: BottleItemConfig[] = [
   {
     id: "bass",
     label: "Bass",
-    subtitle: "Jazz bar / music theory",
+    subtitle: "Musical exploration",
     route: "#work",
     startPosition: [-0.22, 3.5, 0.06],
     rotation: [0.08, 0.2, -0.5],
@@ -31,7 +31,7 @@ export const BOTTLE_ITEMS: BottleItemConfig[] = [
   {
     id: "book",
     label: "Book",
-    subtitle: "Reading notes",
+    subtitle: "Fragments of Thought",
     route: "#work",
     startPosition: [-0.36, 3.82, -0.08],
     rotation: [0.18, -0.18, 0.32],
@@ -44,7 +44,7 @@ export const BOTTLE_ITEMS: BottleItemConfig[] = [
   {
     id: "earth",
     label: "Earth",
-    subtitle: "Little blue planet",
+    subtitle: "Travel notes",
     route: "#room",
     startPosition: [0.18, 4.05, 0.12],
     rotation: [0.2, -0.2, 0.2],
@@ -70,7 +70,7 @@ export const BOTTLE_ITEMS: BottleItemConfig[] = [
   {
     id: "bird",
     label: "Birding",
-    subtitle: "Field notes",
+    subtitle: "Nature discovery",
     route: "#room",
     startPosition: [-0.08, 4.95, 0.18],
     rotation: [0.1, -0.35, -0.18],

@@ -38,8 +38,8 @@ export function RoomScene({ reducedMotion }: RoomSceneProps) {
         intensity={dark ? 1.0 : 1.35}
         color={dark ? "#d7e4ff" : "#fff3dc"}
         castShadow
-        shadow-mapSize-width={4096}
-        shadow-mapSize-height={4096}
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
         shadow-bias={-0.0002}
         shadow-normalBias={0.1}
         shadow-camera-left={-3.9}

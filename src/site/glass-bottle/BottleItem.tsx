@@ -1,6 +1,6 @@
 import { Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { RigidBody } from "@react-three/rapier";
+import { BallCollider, CuboidCollider, RigidBody } from "@react-three/rapier";
 import gsap from "gsap";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
@@ -24,8 +24,20 @@ type BottleItemProps = {
 
 type DropPhase = "waiting" | "dropping" | "settled";
 
+const BOUNDARY_CHECK_INTERVAL = 0.125;
+const BOTTLE_PROFILE: Array<[number, number]> = [
+  [-2.02, 0.72],
+  [-1.56, 0.86],
+  [-0.42, 0.92],
+  [0.62, 0.86],
+  [1.16, 0.68],
+  [1.52, 0.42],
+  [1.84, 0.3]
+];
+
 export function BottleItem({ item, activeId, onActiveChange, reducedMotion, delay }: BottleItemProps) {
   const bodyRef = useRef<RapierRigidBody>(null);
+  const boundaryCheckRef = useRef(0);
   const modelRef = useRef<THREE.Group>(null);
   const dropRef = useRef<THREE.Group>(null);
   const draggingRef = useRef(false);
@@ -36,45 +48,26 @@ export function BottleItem({ item, activeId, onActiveChange, reducedMotion, dela
   const active = activeId === item.id || hovered;
   const finalPosition = useMemo(() => finalPositionFor(item.id), [item.id]);
 
-  useFrame(() => {
+  useFrame((_, delta) => {
     const body = bodyRef.current;
     if (!body || phase !== "settled" || reducedMotion) return;
 
+    boundaryCheckRef.current += Math.min(delta, BOUNDARY_CHECK_INTERVAL);
+    if (boundaryCheckRef.current < BOUNDARY_CHECK_INTERVAL) return;
+    boundaryCheckRef.current = 0;
+
     const position = body.translation();
-    const y = Math.max(-1.9, Math.min(1.68, position.y));
     const radius = Math.hypot(position.x, position.z);
-    const safeRadius = Math.max(0.14, bottleRadiusAt(y) - 0.22);
-
-    if (position.y === y && radius <= safeRadius) return;
-
-    const radialScale = radius > safeRadius ? safeRadius / Math.max(radius, 0.0001) : 1;
-    body.setTranslation(
-      {
-        x: position.x * radialScale,
-        y,
-        z: position.z * radialScale
-      },
-      true
+    const profileY = Math.max(
+      BOTTLE_PROFILE[0][0],
+      Math.min(BOTTLE_PROFILE[BOTTLE_PROFILE.length - 1][0], position.y)
     );
+    const escaped = position.y < -2.24 || position.y > 2.34 || radius > bottleRadiusAt(profileY) + 0.18;
+    if (!escaped) return;
 
-    const velocity = body.linvel();
-    body.setLinvel(
-      {
-        x: velocity.x * 0.12,
-        y: position.y === y ? velocity.y * 0.35 : 0,
-        z: velocity.z * 0.12
-      },
-      true
-    );
-    const angularVelocity = body.angvel();
-    body.setAngvel(
-      {
-        x: angularVelocity.x * 0.35,
-        y: angularVelocity.y * 0.35,
-        z: angularVelocity.z * 0.35
-      },
-      true
-    );
+    body.setTranslation({ x: finalPosition[0], y: finalPosition[1], z: finalPosition[2] }, false);
+    body.setLinvel({ x: 0, y: 0, z: 0 }, false);
+    body.setAngvel({ x: 0, y: 0, z: 0 }, false);
   });
 
   useEffect(() => {
@@ -177,8 +170,7 @@ export function BottleItem({ item, activeId, onActiveChange, reducedMotion, dela
     <RigidBody
       ref={bodyRef}
       type={reducedMotion ? "fixed" : "dynamic"}
-      colliders="cuboid"
-      ccd
+      colliders={false}
       position={finalPosition}
       rotation={item.rotation}
       restitution={0.04}
@@ -189,6 +181,7 @@ export function BottleItem({ item, activeId, onActiveChange, reducedMotion, dela
       enabledTranslations={[true, !reducedMotion, true]}
       enabledRotations={[true, true, true]}
     >
+      <ItemCollider item={item} />
       <group
         ref={modelRef}
         scale={item.scale}
@@ -326,25 +319,35 @@ function finalPositionFor(id: string): [number, number, number] {
 }
 
 function bottleRadiusAt(y: number) {
-  const profile: Array<[number, number]> = [
-    [-2.02, 0.72],
-    [-1.56, 0.86],
-    [-0.42, 0.92],
-    [0.62, 0.86],
-    [1.16, 0.68],
-    [1.52, 0.42],
-    [1.84, 0.3]
-  ];
-
-  for (let index = 1; index < profile.length; index += 1) {
-    const [previousY, previousRadius] = profile[index - 1];
-    const [nextY, nextRadius] = profile[index];
+  for (let index = 1; index < BOTTLE_PROFILE.length; index += 1) {
+    const [previousY, previousRadius] = BOTTLE_PROFILE[index - 1];
+    const [nextY, nextRadius] = BOTTLE_PROFILE[index];
     if (y > nextY) continue;
     const progress = (y - previousY) / (nextY - previousY);
     return previousRadius + (nextRadius - previousRadius) * Math.max(0, Math.min(1, progress));
   }
 
-  return profile[profile.length - 1][1];
+  return BOTTLE_PROFILE[BOTTLE_PROFILE.length - 1][1];
+}
+
+function ItemCollider({ item }: { item: BottleItemConfig }) {
+  const scale = item.scale;
+  const material = { friction: 0.82, restitution: 0.04 };
+
+  switch (item.id) {
+    case "earth":
+      return <BallCollider args={[0.28 * scale]} {...material} />;
+    case "bass":
+      return <CuboidCollider args={[0.18 * scale, 0.58 * scale, 0.09 * scale]} {...material} />;
+    case "book":
+      return <CuboidCollider args={[0.22 * scale, 0.3 * scale, 0.09 * scale]} {...material} />;
+    case "camera":
+      return <CuboidCollider args={[0.31 * scale, 0.2 * scale, 0.2 * scale]} {...material} />;
+    case "bird":
+      return <CuboidCollider args={[0.25 * scale, 0.2 * scale, 0.25 * scale]} {...material} />;
+    case "dumbbell":
+      return <CuboidCollider args={[0.45 * scale, 0.17 * scale, 0.17 * scale]} {...material} />;
+  }
 }
 
 function ItemMesh({ item, active }: { item: BottleItemConfig; active: boolean }) {

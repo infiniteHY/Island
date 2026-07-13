@@ -13,14 +13,16 @@ type BottleSceneProps = {
   activeId: string | null;
   onActiveChange: (id: string | null) => void;
   reducedMotion: boolean;
+  inView: boolean;
 };
 
-export function BottleScene({ activeId, onActiveChange, reducedMotion }: BottleSceneProps) {
+export function BottleScene({ activeId, onActiveChange, reducedMotion, inView }: BottleSceneProps) {
   const keyLightRef = useRef<THREE.DirectionalLight>(null);
   const rimLightRef = useRef<THREE.PointLight>(null);
   const warmLightRef = useRef<THREE.PointLight>(null);
 
   useEffect(() => {
+    if (!inView) return undefined;
     const lights = [keyLightRef.current, rimLightRef.current, warmLightRef.current].filter(Boolean);
     if (!lights.length) return undefined;
 
@@ -45,7 +47,7 @@ export function BottleScene({ activeId, onActiveChange, reducedMotion }: BottleS
     });
 
     return () => ctx.revert();
-  }, []);
+  }, [inView]);
 
   return (
     <>
@@ -62,7 +64,7 @@ export function BottleScene({ activeId, onActiveChange, reducedMotion }: BottleS
           ))}
         </group>
       ) : (
-        <Physics gravity={[0, -3.2, 0]}>
+        <Physics gravity={[0, -3.2, 0]} paused={!inView}>
           <BottlePhysics />
           {BOTTLE_ITEMS.map((item, index) => (
             <BottleItem

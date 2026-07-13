@@ -67,7 +67,7 @@ export function Footer() {
         />
         <div className="footer-profile-copy">
           <motion.p className="mono label-3" variants={{ hidden: { opacity: 0, x: 12 }, show: { opacity: 1, x: 0 } }}>
-            PROFILE.NODE
+            PROFILE.THE OBSERVER
           </motion.p>
           <motion.strong variants={{ hidden: { opacity: 0, x: 14 }, show: { opacity: 1, x: 0 } }}>
             Computer Vision Engineer

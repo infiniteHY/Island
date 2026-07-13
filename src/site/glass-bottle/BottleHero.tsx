@@ -1,18 +1,20 @@
 import { Canvas } from "@react-three/fiber";
 import { motion } from "motion/react";
 import type { CSSProperties } from "react";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useSiteStore } from "../siteStore";
 import { BottleScene } from "./BottleScene";
 import { BOTTLE_NAV_ITEMS } from "./bottleItems";
 
-const titleLines = ["我的世界——", "Reading, Music, Bird."];
+const titleLines = ["我的世界——", "A glass bottle for things that inspire me."];
 
 export function BottleHero() {
+  const sectionRef = useRef<HTMLElement>(null);
   const reducedMotion = useSiteStore((state) => state.reducedMotion);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [compactScene, setCompactScene] = useState(false);
   const [sceneReady, setSceneReady] = useState(false);
+  const [inView, setInView] = useState(true);
   const staticScene = reducedMotion || compactScene;
 
   useEffect(() => {
@@ -23,8 +25,23 @@ export function BottleHero() {
     return () => media.removeEventListener("change", apply);
   }, []);
 
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return undefined;
+    const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), {
+      threshold: 0.01
+    });
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <section className="hero bottle-hero" aria-label="瓶中记忆胶囊首页">
+    <section
+      ref={sectionRef}
+      className="hero bottle-hero"
+      data-rendering={inView ? "active" : "paused"}
+      aria-label="瓶中记忆胶囊首页"
+    >
       <div className="bottle-hero-copy">
         <p className="hero-boot mono label-3" aria-hidden="true">
           MEMORY.CAPSULE // GLASS_BOTTLE ONLINE
@@ -53,7 +70,8 @@ export function BottleHero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.34, ease: [0.22, 1, 0.36, 1] }}
         >
-          贝斯、书、地球、相机、望远镜里的鸟和运动哑铃，会像标本一样落进瓶中。
+          I explore the world through different lenses — music, books, earth, birds, images, and movement.
+          Everything I encounter becomes a part of me.
           <span className="mono label-3">EVERY OBJECT IS A PATH</span>
         </motion.p>
       </div>
@@ -67,6 +85,7 @@ export function BottleHero() {
         <Canvas
           className={`bottle-canvas${sceneReady ? " is-ready" : ""}`}
           dpr={[1, 1.5]}
+          frameloop={inView ? "always" : "never"}
           camera={{ position: [0, 0.05, 7.2], fov: 39 }}
           gl={{ antialias: true, alpha: true }}
           onCreated={({ gl }) => {
@@ -75,7 +94,12 @@ export function BottleHero() {
           }}
         >
           <Suspense fallback={null}>
-            <BottleScene activeId={activeId} onActiveChange={setActiveId} reducedMotion={staticScene} />
+            <BottleScene
+              activeId={activeId}
+              onActiveChange={setActiveId}
+              reducedMotion={staticScene}
+              inView={inView}
+            />
           </Suspense>
         </Canvas>
       </motion.div>

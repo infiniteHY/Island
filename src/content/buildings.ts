@@ -12,7 +12,7 @@ export type BuildingContent = {
 
 export const buildingContent: Record<BuildingId, BuildingContent> = {
   library: {
-    kicker: "Reading Notes",
+    kicker: "Fragments of Thought",
     description: "书单、读书笔记和长期积累的知识索引会先从这里生长。",
     items: [
       { title: "AI 与产品", meta: "持续阅读", body: "整理模型能力、产品判断和实际应用场景。" },
