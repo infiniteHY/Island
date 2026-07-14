@@ -30,7 +30,7 @@ function WallClock() {
   });
 
   return (
-    <group position={[3.05, 3.15, -3.17]}>
+    <group position={[-1.88, 3.5, -3.17]}>
       <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
         <cylinderGeometry args={[0.17, 0.17, 0.045, 32]} />
         <meshStandardMaterial color="#2b2b2b" roughness={0.4} metalness={0.3} />
@@ -95,7 +95,7 @@ function WorldMap({ frameWood }: { frameWood: string }) {
 
   return (
     <group
-      position={[2.78, 2.12, -3.19]}
+      position={[2.78, 2.75, -3.19]}
       onPointerEnter={(event) => {
         event.stopPropagation();
         setHovered("map");

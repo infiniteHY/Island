@@ -1,6 +1,8 @@
+import { Text } from "@react-three/drei";
 import { useState } from "react";
 import { useSiteStore } from "../../siteStore";
 import { useRoomStore } from "../roomStore";
+import { BOOK_NOTES } from "../bookNotes";
 import { RoomObjectLabel } from "../RoomObjectLabel";
 import { Orchid } from "./Orchid";
 import { PothosPlant } from "./PothosPlant";
@@ -90,9 +92,12 @@ function FloorLamp({ position }: { position: [number, number, number] }) {
 }
 
 export function Furniture() {
+  const [hoveredBookKey, setHoveredBookKey] = useState<string | null>(null);
   const dark = useSiteStore((state) => state.theme === "dark");
   const setFocus = useRoomStore((state) => state.setFocus);
   const setHovered = useRoomStore((state) => state.setHovered);
+  const openBook = useRoomStore((state) => state.openBook);
+  const selectedBookId = useRoomStore((state) => state.selectedBookId);
   const wood = dark ? "#a97e52" : "#b98a5a";
   const woodLight = dark ? "#c09a6b" : "#d0a874";
   const woodDark = dark ? "#5e4a36" : "#6c5640";
@@ -287,7 +292,7 @@ export function Furniture() {
         {[
           { y: -0.933, books: [["#405a6e", 0.25], ["#7a5230", 0.22], ["#8a8467", 0.26], ["#4a3550", 0.23], ["#2f4858", 0.25], ["#96552e", 0.21], ["#37503f", 0.24]] as [string, number][], step: 0.15 },
           { y: -0.62, books: [["#8a3b3b", 0.3], ["#2c4a63", 0.34], ["#c8b98f", 0.27], ["#3d5540", 0.32], ["#7a5230", 0.29], ["#333333", 0.33]] as [string, number][] },
-          { y: -0.2, books: [["#5c4a72", 0.31], ["#a06636", 0.27], ["#274052", 0.34], ["#8f8467", 0.28], ["#6b3030", 0.32]] },
+          { y: -0.2, books: [["#5c4a72", 0.31], ["#a06636", 0.29], ["#274052", 0.34], ["#8f8467", 0.3], ["#6b3030", 0.32], ["#3d604c", 0.28]] },
           { y: 0.22, books: [["#37503f", 0.3], ["#96552e", 0.33], ["#42394f", 0.28], ["#b3a075", 0.31]] },
           {
             y: 0.6,
@@ -296,17 +301,72 @@ export function Furniture() {
           }
         ].map(({ y, books, step = 0.155 }, shelf) => (
           <group key={shelf} position={[0.13, y + 0.018, 0]}>
-            {books.map(([color, h], i) => (
-              <mesh
-                key={i}
-                position={[0, (h as number) / 2, -0.46 + i * step]}
-                rotation={[i === books.length - 1 ? 0.16 : (i * 7) % 3 === 0 ? 0.03 : -0.02, 0, 0]}
-                castShadow
-              >
-                <boxGeometry args={[0.16, h as number, 0.085]} />
-                <meshStandardMaterial color={color as string} roughness={0.75} />
-              </mesh>
-            ))}
+            {books.map(([color, h], i) => {
+              const note = shelf === 2 ? BOOK_NOTES[i] : undefined;
+              const selected = Boolean(note && selectedBookId === note.id);
+              const bookKey = `${shelf}-${i}`;
+              const glowing = Boolean(note && (selected || hoveredBookKey === bookKey));
+              return (
+                <group
+                  key={i}
+                  position={[selected ? 0.08 : 0, (h as number) / 2, -0.46 + i * step]}
+                  rotation={[i === books.length - 1 ? 0.16 : (i * 7) % 3 === 0 ? 0.03 : -0.02, 0, 0]}
+                  onPointerEnter={note ? (event) => {
+                    event.stopPropagation();
+                    setHoveredBookKey(bookKey);
+                    setHovered("bookshelf");
+                    document.body.style.cursor = "pointer";
+                  } : undefined}
+                  onPointerLeave={note ? (event) => {
+                    event.stopPropagation();
+                    setHoveredBookKey((current) => current === bookKey ? null : current);
+                    setHovered(null);
+                    document.body.style.cursor = "";
+                  } : undefined}
+                  onClick={note ? (event) => {
+                    event.stopPropagation();
+                    openBook(note.id);
+                  } : undefined}
+                >
+                  <mesh castShadow>
+                    <boxGeometry args={[0.16, h as number, 0.085]} />
+                    <meshStandardMaterial
+                      color={color as string}
+                      roughness={0.75}
+                      emissive={glowing ? "#dfff8b" : "#000000"}
+                      emissiveIntensity={glowing ? 0.58 : 0}
+                    />
+                  </mesh>
+                  {note ? (
+                    <>
+                      <Text
+                        position={[0.081, 0.025, 0]}
+                        rotation={[0, Math.PI / 2, 0]}
+                        fontSize={0.018}
+                        lineHeight={1.05}
+                        maxWidth={0.074}
+                        color={glowing ? "#f2ffd0" : "#efe4c7"}
+                        anchorX="center"
+                        anchorY="middle"
+                        textAlign="center"
+                      >
+                        {note.title}
+                      </Text>
+                      <Text
+                        position={[0.0815, -(h as number) / 2 + 0.032, 0]}
+                        rotation={[0, Math.PI / 2, 0]}
+                        fontSize={0.013}
+                        color={glowing ? "#f2ffd0" : "#d8c9a8"}
+                        anchorX="center"
+                        anchorY="middle"
+                      >
+                        {note.date.slice(2, 7).replace(".", "/")}
+                      </Text>
+                    </>
+                  ) : null}
+                </group>
+              );
+            })}
           </group>
         ))}
         {/* 顶板上：垂蔓绿萝 */}

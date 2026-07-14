@@ -1,23 +1,33 @@
 import { create } from "zustand";
 
-export type RoomFocusId = "computer" | "console" | "vinyl" | "typewriter" | "bookshelf" | "map" | "blackboard" | "porthole";
+export type RoomFocusId = "computer" | "console" | "vinyl" | "typewriter" | "bookshelf" | "fridge" | "map" | "blackboard" | "porthole";
 
 type RoomState = {
   focus: RoomFocusId | null;
   hovered: RoomFocusId | null;
+  selectedBookId: string | null;
   /** 房间是否进入视口（离屏时暂停动画） */
   inView: boolean;
   setFocus: (id: RoomFocusId | null) => void;
   setHovered: (id: RoomFocusId | null) => void;
+  openBook: (id: string) => void;
+  closeBook: () => void;
   setInView: (value: boolean) => void;
 };
 
 export const useRoomStore = create<RoomState>((set) => ({
   focus: null,
   hovered: null,
+  selectedBookId: null,
   inView: false,
-  setFocus: (id) => set({ focus: id, hovered: null }),
+  setFocus: (id) => set((state) => ({
+    focus: id,
+    hovered: null,
+    selectedBookId: id === "bookshelf" ? state.selectedBookId : null
+  })),
   setHovered: (id) => set({ hovered: id }),
+  openBook: (id) => set({ focus: "bookshelf", hovered: null, selectedBookId: id }),
+  closeBook: () => set({ selectedBookId: null }),
   setInView: (value) => set({ inView: value })
 }));
 
@@ -45,7 +55,12 @@ export const ROOM_OBJECT_META: Record<RoomFocusId, { label: string; subtitle: st
   bookshelf: {
     label: "Bookshelf",
     subtitle: "MY NOTES",
-    hint: "这里放我读过的书和笔记 · ESC 退出"
+    hint: "第三层六本书可以打开真实读书笔记 · ESC 退出"
+  },
+  fridge: {
+    label: "Fridge",
+    subtitle: "MIDNIGHT SNACKS",
+    hint: "冰箱门已打开：饮料和零食都在里面 · ESC 退出"
   },
   map: {
     label: "World Map",

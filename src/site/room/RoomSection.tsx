@@ -1,9 +1,10 @@
 import { Canvas } from "@react-three/fiber";
-import { Suspense, useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { ROOM_OBJECT_META, useRoomStore } from "./roomStore";
 import { RoomScene } from "./RoomScene";
 import { useScrollLock } from "./useScrollLock";
 import { useSiteStore } from "../siteStore";
+import { BOOK_NOTES } from "./bookNotes";
 
 export function RoomSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -12,8 +13,13 @@ export function RoomSection() {
   const inView = useRoomStore((state) => state.inView);
   const setFocus = useRoomStore((state) => state.setFocus);
   const setInView = useRoomStore((state) => state.setInView);
+  const selectedBookId = useRoomStore((state) => state.selectedBookId);
+  const closeBook = useRoomStore((state) => state.closeBook);
   const reducedMotion = useSiteStore((state) => state.reducedMotion);
+  const [bookText, setBookText] = useState("");
+  const [bookLoading, setBookLoading] = useState(false);
   const active = focus ?? hovered;
+  const selectedBook = BOOK_NOTES.find((book) => book.id === selectedBookId);
 
   useScrollLock(Boolean(focus));
 
@@ -33,6 +39,33 @@ export function RoomSection() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [focus, setFocus]);
+
+  useEffect(() => {
+    if (!selectedBook) {
+      setBookText("");
+      setBookLoading(false);
+      return undefined;
+    }
+    const controller = new AbortController();
+    setBookLoading(true);
+    fetch(selectedBook.source, { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error(`Failed to load ${selectedBook.source}`);
+        return response.text();
+      })
+      .then((text) => {
+        const body = text.replace(/^\uFEFF?[^\n]*\n?/, "").trim();
+        setBookText(body);
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setBookText("笔记正文暂时无法读取。");
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setBookLoading(false);
+      });
+    return () => controller.abort();
+  }, [selectedBook]);
 
   return (
     <section ref={sectionRef} id="room" className="room-section" aria-labelledby="room-title">
@@ -69,6 +102,21 @@ export function RoomSection() {
             <strong>{active ? ROOM_OBJECT_META[active].hint : "点击房间里发光的物件 · ESC 退出"}</strong>
           </div>
         </div>
+
+        {focus === "bookshelf" && selectedBook ? (
+          <article className="book-letter" aria-label={`${selectedBook.title}读书笔记`}>
+            <div className="book-letter-stamp mono">READING NOTE · {selectedBook.date}</div>
+            <button type="button" className="book-letter-close mono" onClick={closeBook} aria-label="收起读书笔记">
+              ×
+            </button>
+            <p className="book-letter-kicker mono">TO MY FUTURE SELF,</p>
+            <h3>{selectedBook.title}</h3>
+            <p className="book-letter-author">{selectedBook.author}</p>
+            <div className="book-letter-body">
+              {bookLoading ? "正在展开笔记……" : bookText}
+            </div>
+          </article>
+        ) : null}
       </div>
     </section>
   );

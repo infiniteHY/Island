@@ -14,7 +14,8 @@ export const FOCUS_POSES: Record<RoomFocusId, CameraPose> = {
   vinyl: { position: [2.35, 1.35, -0.75], target: [2.18, 0.86, -1.98] },
   console: { position: [-0.63, 1.22, -1.28], target: [-0.85, 0.95, -2.0] },
   bookshelf: { position: [-0.52, 1.0, -0.55], target: [-2.98, 1.0, -0.55] },
-  map: { position: [2.78, 2.12, -2.0], target: [2.78, 2.12, -3.19] },
+  fridge: { position: [3.25, 1.38, -0.62], target: [3.35, 1.0, -2.45] },
+  map: { position: [2.78, 2.75, -2.0], target: [2.78, 2.75, -3.19] },
   blackboard: { position: [-1.62, 2.08, 1.0], target: [-3.17, 2.08, 1.0] },
   porthole: { position: [0.2, 2.4, -1.25], target: [0.2, 2.4, -3.27] }
 };

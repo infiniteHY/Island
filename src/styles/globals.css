@@ -963,6 +963,107 @@ a.work-panel:hover .work-title {
   display: block;
 }
 
+.book-letter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 4;
+  width: min(520px, calc(100% - 40px));
+  max-height: min(680px, calc(100% - 110px));
+  padding: clamp(32px, 5vw, 54px);
+  overflow-y: auto;
+  transform: translate(-50%, -50%) rotate(-0.7deg);
+  border: 1px solid rgba(101, 77, 45, 0.28);
+  background:
+    linear-gradient(rgba(105, 80, 48, 0.055) 1px, transparent 1px) 0 38px / 100% 28px,
+    #f3ead5;
+  box-shadow:
+    0 30px 90px rgba(0, 0, 0, 0.42),
+    inset 0 0 80px rgba(119, 83, 39, 0.08);
+  color: #373027;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.book-letter::before {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  pointer-events: none;
+  border: 1px solid rgba(112, 83, 49, 0.14);
+}
+
+.book-letter-stamp {
+  display: inline-block;
+  padding: 5px 8px;
+  border: 1px solid rgba(133, 67, 51, 0.5);
+  color: #955442;
+  font-size: 0.64rem;
+  letter-spacing: 0.1em;
+  transform: rotate(-2deg);
+}
+
+.book-letter-close {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(72, 56, 36, 0.24);
+  border-radius: 50%;
+  color: #64543f;
+  font-size: 1.2rem;
+}
+
+.book-letter-close:hover {
+  border-color: #955442;
+  color: #955442;
+}
+
+.book-letter-kicker {
+  margin: 34px 0 12px;
+  color: #80705d;
+  font-size: 0.68rem;
+  letter-spacing: 0.13em;
+}
+
+.book-letter h3 {
+  margin: 0;
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.book-letter-author {
+  margin: 8px 0 24px;
+  color: #786b5c;
+  font-style: italic;
+}
+
+.book-letter blockquote {
+  margin: 0 0 22px;
+  padding: 14px 18px;
+  border-left: 3px solid #a66b4d;
+  background: rgba(141, 101, 61, 0.07);
+  color: #5d4c3c;
+  font-size: 1rem;
+  font-style: italic;
+  line-height: 1.75;
+}
+
+.book-letter-body {
+  font-size: 0.92rem;
+  line-height: 1.9;
+  text-align: justify;
+  white-space: pre-wrap;
+}
+
+.book-letter-body p {
+  margin: 0 0 14px;
+  font-size: 0.92rem;
+  line-height: 1.9;
+  text-align: justify;
+}
+
 .room-hint strong {
   margin-top: 4px;
   color: var(--label-1);
@@ -1067,6 +1168,11 @@ a.work-panel:hover .work-title {
   .room-hint {
     margin-left: 0;
     text-align: left;
+  }
+
+  .book-letter {
+    max-height: calc(100% - 140px);
+    padding: 30px 26px 34px;
   }
 }
 
