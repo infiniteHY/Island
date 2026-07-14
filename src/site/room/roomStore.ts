@@ -59,7 +59,7 @@ export const ROOM_OBJECT_META: Record<RoomFocusId, { label: string; subtitle: st
   },
   porthole: {
     label: "Porthole",
-    subtitle: "THE MILKY WAY",
-    hint: "舷窗外的真实银河（ESO 全景摄影） · ESC 退出"
+    subtitle: "XINJIANG NIGHT SKY",
+    hint: "20240714 摄于新疆 · ESC 退出"
   }
 };

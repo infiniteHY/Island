@@ -8,7 +8,7 @@ import { RoomObjectLabel } from "../RoomObjectLabel";
 
 /**
  * 开放式两墙房间：实木拼板地板 + 星际飞船圆形舷窗（圈梁螺栓/多层玻璃，
- * 窗外是真实银河系全景摄影，点击可放大细看）+ 踢脚线、挂钟、真实世界地图挂画、椭圆地毯。
+ * 窗外是 2024 年摄于新疆的星空，点击可放大细看）+ 踢脚线、挂钟、真实世界地图挂画、椭圆地毯。
  * 从右前方观看时不会被墙体挡住。
  */
 
@@ -161,27 +161,47 @@ function WorldMap({ frameWood }: { frameWood: string }) {
 }
 
 /**
- * 舷窗外的真实银河：ESO 360° 全景摄影（Wikimedia Commons）。
- * 背景板远置（z=-7.5）并放大，与舷窗圈梁形成视差，看起来是"窗外的宇宙"
- * 而不是贴在窗后的画；关闭雾效影响保持深空纯黑；横向裁切（repeat 0.625）
- * 保持照片比例不拉伸，并以极慢速度水平漂移（全景图水平无缝可循环）。
+ * 舷窗外的新疆星空照片。背景板远置（z=-7.5）并放大，与舷窗圈梁形成
+ * 视差，看起来是"窗外的星空"而不是贴在窗后的画；画面保持原始 3:2 比例。
  */
-function MilkyWayView() {
-  const map = useTexture("/textures/milky-way.jpg");
+function XinjiangView() {
+  const map = useTexture("/textures/xinjiang-raf.jpg");
   map.colorSpace = THREE.SRGBColorSpace;
   map.anisotropy = 8;
-  map.wrapS = THREE.RepeatWrapping;
-  map.repeat.set(0.625, 1);
 
-  useFrame((_, delta) => {
-    map.offset.x = (map.offset.x + delta * 0.0016) % 1;
-  });
+  const watermark = useMemo(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1200;
+    canvas.height = 160;
+    const context = canvas.getContext("2d");
+    if (context) {
+      context.font = "600 48px 'Courier New', Courier, monospace";
+      context.fillStyle = "rgba(232, 181, 83, 0.88)";
+      context.shadowColor = "rgba(122, 66, 18, 0.68)";
+      context.shadowBlur = 7;
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.fillText("2024/07/14 xinjiang", 600, 82);
+    }
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.minFilter = THREE.LinearFilter;
+    return texture;
+  }, []);
+
+  useEffect(() => () => watermark.dispose(), [watermark]);
 
   return (
-    <mesh position={[-0.1, 2.1, -7.5]}>
-      <planeGeometry args={[8, 6.4]} />
-      <meshBasicMaterial map={map} toneMapped={false} fog={false} />
-    </mesh>
+    <group>
+      <mesh position={[-0.1, 2.4, -7.5]}>
+        <planeGeometry args={[9.6, 6.4]} />
+        <meshBasicMaterial map={map} toneMapped={false} fog={false} />
+      </mesh>
+      <mesh position={[0.2, 0.6, -7.42]}>
+        <planeGeometry args={[3, 0.4]} />
+        <meshBasicMaterial map={watermark} transparent toneMapped={false} fog={false} depthWrite={false} />
+      </mesh>
+    </group>
   );
 }
 
@@ -210,15 +230,15 @@ export function RoomShell() {
   // 舷窗补墙板：与墙同色的矩形板中央开圆形窗孔（Shape 挖孔后挤出），盖住墙上的旧矩形洞口
   const bulkheadGeo = useMemo(() => {
     const shape = new THREE.Shape();
-    const hw = 1.38;
-    const hh = 1.16;
+    const hw = 1.5;
+    const hh = 1.42;
     shape.moveTo(-hw, -hh);
     shape.lineTo(hw, -hh);
     shape.lineTo(hw, hh);
     shape.lineTo(-hw, hh);
     shape.closePath();
     const hole = new THREE.Path();
-    hole.absarc(0, 0, 0.9, 0, Math.PI * 2, true);
+    hole.absarc(0, 0, 1.1, 0, Math.PI * 2, true);
     shape.holes.push(hole);
     return new THREE.ExtrudeGeometry(shape, { depth: 0.14, bevelEnabled: false, curveSegments: 48 });
   }, []);
@@ -249,7 +269,7 @@ export function RoomShell() {
         </mesh>
       ))}
 
-      {/* 后墙：中央开夜景大窗（洞口 x -1.1..1.5, y 1.05..3.15）
+      {/* 后墙：中央开夜景大窗（洞口 x -1.1..1.5, y 1.2..3.5）
           墙体上沿加高到 y≈5.4，避免视差移动时视口上缘露出墙外背景的三角空隙 */}
       <mesh position={[-2.2, 2.64, -3.26]} receiveShadow>
         <boxGeometry args={[2.2, 5.5, 0.12]} />
@@ -259,12 +279,12 @@ export function RoomShell() {
         <boxGeometry args={[3.1, 5.5, 0.12]} />
         <meshStandardMaterial color={wall} roughness={0.92} />
       </mesh>
-      <mesh position={[0.2, 0.47, -3.26]} receiveShadow>
-        <boxGeometry args={[2.6, 1.16, 0.12]} />
+      <mesh position={[0.2, 0.55, -3.26]} receiveShadow>
+        <boxGeometry args={[2.6, 1.3, 0.12]} />
         <meshStandardMaterial color={wall} roughness={0.92} />
       </mesh>
-      <mesh position={[0.2, 4.27, -3.26]} receiveShadow>
-        <boxGeometry args={[2.6, 2.24, 0.12]} />
+      <mesh position={[0.2, 4.45, -3.26]} receiveShadow>
+        <boxGeometry args={[2.6, 1.9, 0.12]} />
         <meshStandardMaterial color={wall} roughness={0.92} />
       </mesh>
       {/* 左侧墙（与后墙同步加高） */}
@@ -273,16 +293,16 @@ export function RoomShell() {
         <meshStandardMaterial color={wallSide} roughness={0.92} />
       </mesh>
 
-      {/* 舷窗外：真实银河系全景（ESO 摄影），常驻显示 */}
-      <MilkyWayView />
+      {/* 舷窗外：2024-07-14 摄于新疆的星空，常驻显示 */}
+      <XinjiangView />
 
       {/* ── 飞船舷窗（参考 ISS 舷窗：圆形观察窗 + 承压圈梁 + 螺栓圈）──
           圆形之外不再用金属舱壁板，改用与墙同色的补板盖住旧矩形窗洞，
           让舷窗像直接嵌在墙上，金属件只保留圆形圈梁部分 */}
-      <mesh geometry={bulkheadGeo} position={[0.2, 2.1, -3.338]} receiveShadow>
+      <mesh geometry={bulkheadGeo} position={[0.2, 2.4, -3.338]} receiveShadow>
         <meshStandardMaterial color={wall} roughness={0.92} />
       </mesh>
-      {/* 可点击的舷窗主体：点击放大看真实银河 */}
+      {/* 可点击的舷窗主体：点击放大看新疆星空 */}
       <group
         onPointerEnter={(event) => {
           event.stopPropagation();
@@ -300,8 +320,8 @@ export function RoomShell() {
         }}
       >
         {/* 承压圈梁：窗孔外的粗壮金属环（主结构） */}
-        <mesh position={[0.2, 2.1, -3.2]} castShadow>
-          <torusGeometry args={[0.97, 0.085, 14, 48]} />
+        <mesh position={[0.2, 2.4, -3.2]} castShadow>
+          <torusGeometry args={[1.18, 0.095, 14, 48]} />
           <meshStandardMaterial color={hullRing} metalness={0.6} roughness={0.35} />
         </mesh>
         {/* 螺栓圈：沿圈梁一周的六角螺栓 */}
@@ -310,7 +330,7 @@ export function RoomShell() {
           return (
             <mesh
               key={i}
-              position={[0.2 + Math.cos(a) * 0.97, 2.1 + Math.sin(a) * 0.97, -3.145]}
+              position={[0.2 + Math.cos(a) * 1.18, 2.4 + Math.sin(a) * 1.18, -3.145]}
               rotation={[Math.PI / 2, 0, a]}
             >
               <cylinderGeometry args={[0.028, 0.028, 0.035, 6]} />
@@ -319,23 +339,23 @@ export function RoomShell() {
           );
         })}
         {/* 井壁套筒：从圈梁向外延伸的舱体厚度（内壁可见），舷窗因此有"穿过船壳"的纵深 */}
-        <mesh position={[0.2, 2.1, -3.45]} rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[0.9, 0.9, 0.55, 48, 1, true]} />
+        <mesh position={[0.2, 2.4, -3.45]} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[1.1, 1.1, 0.55, 48, 1, true]} />
           <meshStandardMaterial color={hullDark} metalness={0.45} roughness={0.55} side={THREE.BackSide} />
         </mesh>
         {/* 套筒外端收口环 */}
-        <mesh position={[0.2, 2.1, -3.7]}>
-          <torusGeometry args={[0.9, 0.04, 10, 48]} />
+        <mesh position={[0.2, 2.4, -3.7]}>
+          <torusGeometry args={[1.1, 0.045, 10, 48]} />
           <meshStandardMaterial color={hullDark} metalness={0.5} roughness={0.45} />
         </mesh>
         {/* 内压环：贴玻璃的一圈细环（第二道密封），随玻璃一起深入井内 */}
-        <mesh position={[0.2, 2.1, -3.46]}>
-          <torusGeometry args={[0.87, 0.035, 12, 44]} />
+        <mesh position={[0.2, 2.4, -3.46]}>
+          <torusGeometry args={[1.07, 0.04, 12, 44]} />
           <meshStandardMaterial color={hullDark} metalness={0.5} roughness={0.4} />
         </mesh>
         {/* 多层观察玻璃：退到井底，更透明（opacity 0.04），窗外就是宇宙本身 */}
-        <mesh position={[0.2, 2.1, -3.5]}>
-          <circleGeometry args={[0.9, 48]} />
+        <mesh position={[0.2, 2.4, -3.5]}>
+          <circleGeometry args={[1.1, 48]} />
           <meshStandardMaterial
             color="#a8c2e8"
             transparent
@@ -346,11 +366,11 @@ export function RoomShell() {
             side={2}
           />
         </mesh>
-        <mesh position={[0.2, 2.1, -3.48]}>
-          <torusGeometry args={[0.55, 0.006, 6, 40]} />
+        <mesh position={[0.2, 2.4, -3.48]}>
+          <torusGeometry args={[0.68, 0.006, 6, 40]} />
           <meshBasicMaterial color="#cfe0ff" transparent opacity={0.08} />
         </mesh>
-        <RoomObjectLabel id="porthole" position={[0.2, 0.98, -3.1]} />
+        <RoomObjectLabel id="porthole" position={[0.2, 1.02, -3.1]} />
       </group>
 
       {/* 踢脚线 */}
