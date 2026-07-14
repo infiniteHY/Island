@@ -1266,6 +1266,7 @@ a.work-panel:hover .work-title {
 .pip-console-screen p {
   margin: 0;
   min-height: 1.5em;
+  flex-shrink: 0;
   white-space: pre-wrap;
 }
 
@@ -1274,6 +1275,7 @@ a.work-panel:hover .work-title {
 }
 
 .pip-command {
+  flex-shrink: 0;
   margin-top: auto;
   display: flex;
   align-items: center;
