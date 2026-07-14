@@ -1,4 +1,4 @@
-import { Text } from "@react-three/drei";
+import { Text, useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
@@ -6,7 +6,7 @@ import { useRoomStore } from "../roomStore";
 import { RoomObjectLabel } from "../RoomObjectLabel";
 
 /** 网易云外链直出音频：Mila J - Kickin' Back（id 474484015） */
-const SONG_URL = "https://music.163.com/song/media/outer/url?id=474484015.mp3";
+const SONG_URL = "https://music.163.com/song/media/outer/url?id=3370310523.mp3";
 
 /**
  * 黑胶唱机：木纹底座、缓冲脚垫、转盘（黑胶纹路/标签/中轴）、
@@ -15,6 +15,9 @@ const SONG_URL = "https://music.163.com/song/media/outer/url?id=474484015.mp3";
  * 放在长边柜台面（y≈0.73）上。
  */
 export function RecordPlayer({ reducedMotion }: { reducedMotion: boolean }) {
+  const labelTexture = useTexture("/textures/music.jpg");
+  labelTexture.colorSpace = THREE.SRGBColorSpace;
+  labelTexture.anisotropy = 8;
   const discRef = useRef<THREE.Group>(null);
   const armRef = useRef<THREE.Group>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -143,33 +146,15 @@ export function RecordPlayer({ reducedMotion }: { reducedMotion: boolean }) {
               <meshStandardMaterial color="#26262a" roughness={0.4} side={2} />
             </mesh>
           ))}
-          {/* 中心标签（带文字与偏心刻度，转起来能明显看出旋转） */}
+          {/* 中心标签：music.jpg 圆形裁切，随唱片一起旋转 */}
           <mesh position={[0, 0.008, 0]}>
-            <cylinderGeometry args={[0.085, 0.085, 0.004, 32]} />
-            <meshStandardMaterial color={playing ? "#c9522f" : "#b8452a"} roughness={0.55} />
+            <cylinderGeometry args={[0.1, 0.1, 0.004, 40]} />
+            <meshStandardMaterial color="#050506" roughness={0.42} />
           </mesh>
-          <Text
-            position={[0, 0.0115, -0.032]}
-            rotation={[-Math.PI / 2, 0, 0]}
-            fontSize={0.017}
-            letterSpacing={0.14}
-            color="#f4e8d2"
-            anchorX="center"
-            anchorY="middle"
-          >
-            ISLAND
-          </Text>
-          <Text
-            position={[0, 0.0115, 0.036]}
-            rotation={[-Math.PI / 2, 0, 0]}
-            fontSize={0.01}
-            letterSpacing={0.1}
-            color="#e8cdb4"
-            anchorX="center"
-            anchorY="middle"
-          >
-            33 RPM
-          </Text>
+          <mesh position={[0, 0.011, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <circleGeometry args={[0.098, 48]} />
+            <meshBasicMaterial map={labelTexture} toneMapped={false} />
+          </mesh>
           {/* 盘面高光反条（非对称扇形，随盘扫过更显转动） */}
           <mesh position={[0, 0.0075, 0]} rotation={[-Math.PI / 2, 0, 0.9]}>
             <ringGeometry args={[0.1, 0.24, 24, 1, 0, 0.5]} />
