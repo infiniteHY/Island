@@ -79,7 +79,7 @@ export function BottleScene({ activeId, onActiveChange, reducedMotion, inView }:
         </Physics>
       )}
 
-      <Float speed={1.1} rotationIntensity={0.05} floatIntensity={0.12}>
+      <Float speed={reducedMotion ? 0 : 1.1} rotationIntensity={reducedMotion ? 0 : 0.05} floatIntensity={reducedMotion ? 0 : 0.12}>
         <BottleGlass />
       </Float>
       <BottleHighlights />

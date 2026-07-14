@@ -1,7 +1,7 @@
-import { Text } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
+import { CanvasTextPlane } from "../CanvasTextPlane";
 import { useRoomStore } from "../roomStore";
 import { RoomObjectLabel } from "../RoomObjectLabel";
 import { createBreakout, launchBreakout, movePaddle, nextLevel, stepBreakout, type BreakoutState } from "../games/breakout";
@@ -370,9 +370,7 @@ export function RetroConsole() {
               <cylinderGeometry args={[0.0105, 0.0115, 0.007, 14]} />
               <meshStandardMaterial color={BUTTON_DARK} roughness={0.5} />
             </mesh>
-            <Text position={[0, 0, 0.005]} fontSize={0.011} color="#8a8a92" anchorX="center" anchorY="middle">
-              {ch}
-            </Text>
+            <CanvasTextPlane text={ch} position={[0, 0, 0.005]} width={0.016} height={0.016} fontSize={96} fontWeight={700} color="#b8bac2" padding={1} maxLines={1} />
           </group>
         ))}
         {/* 摇杆（下） */}

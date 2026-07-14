@@ -18,10 +18,19 @@ export function RoomSection() {
   const reducedMotion = useSiteStore((state) => state.reducedMotion);
   const [bookText, setBookText] = useState("");
   const [bookLoading, setBookLoading] = useState(false);
+  const [compactScene, setCompactScene] = useState(false);
   const active = focus ?? hovered;
   const selectedBook = BOOK_NOTES.find((book) => book.id === selectedBookId);
 
   useScrollLock(Boolean(focus));
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 700px), (pointer: coarse)");
+    const apply = () => setCompactScene(media.matches);
+    apply();
+    media.addEventListener("change", apply);
+    return () => media.removeEventListener("change", apply);
+  }, []);
 
   useEffect(() => {
     const node = sectionRef.current;
@@ -78,16 +87,17 @@ export function RoomSection() {
         </div>
       </div>
 
-      <div className="room-stage" data-focused={Boolean(focus)}>
+      <div className="room-stage" data-focused={Boolean(focus)} data-compact={compactScene}>
         <Canvas
           className="room-canvas"
-          shadows="soft"
-          dpr={[1, 1.5]}
-          camera={{ position: [3.0, 2.08, 3.55], fov: 50, near: 0.1, far: 40 }}
+          shadows={compactScene ? false : "soft"}
+          dpr={compactScene ? 1 : [1, 1.5]}
+          camera={{ position: [3.0, 2.08, 3.55], fov: compactScene ? 64 : 50, near: 0.1, far: 40 }}
           frameloop={inView || focus ? "always" : "never"}
+          gl={{ antialias: !compactScene, powerPreference: compactScene ? "low-power" : "high-performance" }}
         >
           <Suspense fallback={null}>
-            <RoomScene reducedMotion={reducedMotion} />
+            <RoomScene reducedMotion={reducedMotion || compactScene} compact={compactScene} />
           </Suspense>
         </Canvas>
 

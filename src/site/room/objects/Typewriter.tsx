@@ -1,7 +1,8 @@
-import { Html, Text } from "@react-three/drei";
+import { Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import { CanvasTextPlane } from "../CanvasTextPlane";
 import { useRoomStore } from "../roomStore";
 import { RoomObjectLabel } from "../RoomObjectLabel";
 
@@ -10,8 +11,8 @@ const KEY_ROWS = ["1234567890", "qwertyuiop", "asdfghjkl", "zxcvbnm"];
 const PRESS_MS = 150;
 const MAX_CHARS = 200;
 /** 纸上一行的宽度（字符数）与可见行数（超出后旧行上移出视野） */
-const LINE_CHARS = 17;
-const VISIBLE_LINES = 5;
+const LINE_CHARS = 23;
+const VISIBLE_LINES = 6;
 
 /** 只保留打字机能敲出的字符：字母（转大写）、数字、空格与常用标点 */
 function sanitize(raw: string) {
@@ -302,17 +303,22 @@ export function Typewriter() {
       </mesh>
 
       {active ? (
-        <Text
-          position={[-0.16, 0.61, -0.15]}
+        <CanvasTextPlane
+          text={paperText}
+          position={[0, 0.465, -0.118]}
           rotation={[-0.16, 0, 0]}
-          fontSize={0.03}
-          lineHeight={1.5}
-          color="#4a453a"
-          anchorX="left"
-          anchorY="top"
-        >
-          {paperText}
-        </Text>
+          width={0.42}
+          height={0.29}
+          fontSize={34}
+          lineHeight={1.2}
+          fontWeight={1000}
+          color="#332f28"
+          align="left"
+          verticalAlign="top"
+          padding={20}
+          maxLines={VISIBLE_LINES}
+          wrap={false}
+        />
       ) : null}
 
       {/* 隐藏输入框（承接真实上屏字符）+ 确认寄出按钮 */}

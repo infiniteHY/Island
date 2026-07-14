@@ -84,10 +84,10 @@ export function BottleHero() {
       >
         <Canvas
           className={`bottle-canvas${sceneReady ? " is-ready" : ""}`}
-          dpr={[1, 1.5]}
-          frameloop={inView ? "always" : "never"}
+          dpr={compactScene ? 1 : [1, 1.5]}
+          frameloop={inView ? (staticScene ? "demand" : "always") : "never"}
           camera={{ position: [0, 0.05, 7.2], fov: 39 }}
-          gl={{ antialias: true, alpha: true }}
+          gl={{ antialias: !compactScene, alpha: true, powerPreference: compactScene ? "low-power" : "high-performance" }}
           onCreated={({ gl }) => {
             gl.setClearColor(0x000000, 0);
             setSceneReady(true);

@@ -6,9 +6,10 @@ import { useSiteStore } from "../siteStore";
 
 type RoomSceneProps = {
   reducedMotion: boolean;
+  compact: boolean;
 };
 
-export function RoomScene({ reducedMotion }: RoomSceneProps) {
+export function RoomScene({ reducedMotion, compact }: RoomSceneProps) {
   const theme = useSiteStore((state) => state.theme);
   const focus = useRoomStore((state) => state.focus);
   const setFocus = useRoomStore((state) => state.setFocus);
@@ -37,9 +38,9 @@ export function RoomScene({ reducedMotion }: RoomSceneProps) {
         position={[-2.2, 4.6, 3.8]}
         intensity={dark ? 1.0 : 1.35}
         color={dark ? "#d7e4ff" : "#fff3dc"}
-        castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
+        castShadow={!compact}
+        shadow-mapSize-width={compact ? 512 : 2048}
+        shadow-mapSize-height={compact ? 512 : 2048}
         shadow-bias={-0.0002}
         shadow-normalBias={0.1}
         shadow-camera-left={-3.9}
@@ -52,9 +53,9 @@ export function RoomScene({ reducedMotion }: RoomSceneProps) {
       {/* 窗口月光：冷色从窗外斜洒进屋 */}
       <directionalLight position={[0.6, 3.2, -4.4]} intensity={dark ? 0.55 : 0.3} color="#a9bfe8" />
       {/* 书桌区暖色补光 */}
-      <pointLight position={[-1.4, 1.6, -1.6]} intensity={dark ? 0.9 : 0.6} color="#ffc07a" distance={4.2} />
+      {!compact ? <pointLight position={[-1.4, 1.6, -1.6]} intensity={dark ? 0.9 : 0.6} color="#ffc07a" distance={4.2} /> : null}
       {/* 边柜区暖色补光 */}
-      <pointLight position={[1.8, 1.5, -1.5]} intensity={dark ? 0.7 : 0.45} color="#ffd39b" distance={3.6} />
+      {!compact ? <pointLight position={[1.8, 1.5, -1.5]} intensity={dark ? 0.7 : 0.45} color="#ffd39b" distance={3.6} /> : null}
       <RoomCamera reducedMotion={reducedMotion} />
       <group onClick={clearFocus}>
         <RoomModel reducedMotion={reducedMotion} />

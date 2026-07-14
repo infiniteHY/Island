@@ -1,6 +1,7 @@
-import { Text } from "@react-three/drei";
+import { Html } from "@react-three/drei";
 import { useState } from "react";
 import { useSiteStore } from "../../siteStore";
+import { CanvasTextPlane } from "../CanvasTextPlane";
 import { useRoomStore } from "../roomStore";
 import { BOOK_NOTES } from "../bookNotes";
 import { RoomObjectLabel } from "../RoomObjectLabel";
@@ -339,29 +340,42 @@ export function Furniture() {
                   </mesh>
                   {note ? (
                     <>
-                      <Text
+                      <CanvasTextPlane
+                        text={note.title}
                         position={[0.081, 0.025, 0]}
                         rotation={[0, Math.PI / 2, 0]}
-                        fontSize={0.018}
-                        lineHeight={1.05}
-                        maxWidth={0.074}
+                        width={0.074}
+                        height={Math.max(0.075, (h as number) * 0.46)}
+                        fontSize={160}
+                        lineHeight={0.96}
                         color={glowing ? "#f2ffd0" : "#efe4c7"}
-                        anchorX="center"
-                        anchorY="middle"
-                        textAlign="center"
-                      >
-                        {note.title}
-                      </Text>
-                      <Text
+                        padding={2}
+                        maxLines={4}
+                      />
+                      <CanvasTextPlane
+                        text={note.date.slice(2, 7).replace(".", "/")}
                         position={[0.0815, -(h as number) / 2 + 0.032, 0]}
                         rotation={[0, Math.PI / 2, 0]}
-                        fontSize={0.013}
+                        width={0.068}
+                        height={0.022}
+                        fontSize={78}
                         color={glowing ? "#f2ffd0" : "#d8c9a8"}
-                        anchorX="center"
-                        anchorY="middle"
-                      >
-                        {note.date.slice(2, 7).replace(".", "/")}
-                      </Text>
+                        padding={5}
+                        maxLines={1}
+                      />
+                      {hoveredBookKey === bookKey ? (
+                        <Html
+                          position={[0.24, (h as number) / 2 + 0.11, 0]}
+                          center
+                          distanceFactor={5}
+                          className="book-hover-label-wrap"
+                        >
+                          <div className="bottle-label book-hover-label">
+                            <strong>{note.title}</strong>
+                            <span>{note.author}</span>
+                          </div>
+                        </Html>
+                      ) : null}
                     </>
                   ) : null}
                 </group>

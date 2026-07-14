@@ -1,8 +1,8 @@
-import { Text } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import * as THREE from "three";
 import { useRoomStore } from "../roomStore";
+import { CanvasTextPlane } from "../CanvasTextPlane";
 import { RoomObjectLabel } from "../RoomObjectLabel";
 
 /** 330ml sleek can：按约 58mm × 146mm 的真实比例缩放。 */
@@ -47,27 +47,24 @@ function CocaColaCan({ position, rotation = 0 }: { position: [number, number, nu
       </mesh>
 
       {/* 正面品牌与经典白色波带 */}
-      <Text
+      <CanvasTextPlane
+        text="Coca-Cola"
         position={[0, 0.02, 0.047]}
-        fontSize={0.019}
+        width={0.082}
+        height={0.033}
+        fontSize={78}
         fontStyle="italic"
-        letterSpacing={-0.06}
+        fontFamily='Georgia, "Times New Roman", serif'
         color="#fff8ed"
-        anchorX="center"
-        anchorY="middle"
-      >
-        Coca-Cola
-      </Text>
+        padding={3}
+        maxLines={1}
+      />
       <mesh position={[0, -0.012, 0.0475]} rotation={[0, 0, -0.16]}>
         <planeGeometry args={[0.082, 0.008]} />
         <meshBasicMaterial color="#fff8ed" />
       </mesh>
-      <Text position={[0, -0.055, 0.047]} fontSize={0.0065} letterSpacing={0.08} color="#fff8ed" anchorX="center">
-        ORIGINAL TASTE
-      </Text>
-      <Text position={[0, -0.086, 0.047]} fontSize={0.006} color="#fff8ed" anchorX="center">
-        330 ml
-      </Text>
+      <CanvasTextPlane text="ORIGINAL TASTE" position={[0, -0.055, 0.047]} width={0.078} height={0.014} fontSize={52} fontWeight={700} color="#fff8ed" padding={2} maxLines={1} />
+      <CanvasTextPlane text="330 ml" position={[0, -0.086, 0.047]} width={0.052} height={0.013} fontSize={58} fontWeight={700} color="#fff8ed" padding={2} maxLines={1} />
       {/* 侧面窄高光，强化铝罐弧面 */}
       <mesh position={[-0.034, 0.006, 0.033]} rotation={[0, -0.72, 0]}>
         <planeGeometry args={[0.009, 0.19]} />

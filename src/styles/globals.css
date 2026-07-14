@@ -327,6 +327,7 @@ a {
   background: transparent !important;
   opacity: 0;
   transition: opacity 160ms ease-out;
+  touch-action: pan-y;
 }
 
 .bottle-canvas.is-ready {
@@ -918,6 +919,7 @@ a.work-panel:hover .work-title {
 .room-canvas {
   position: absolute;
   inset: 0;
+  touch-action: pan-y;
 }
 
 .room-overlay {
@@ -982,6 +984,45 @@ a.work-panel:hover .work-title {
     inset 0 0 80px rgba(119, 83, 39, 0.08);
   color: #373027;
   font-family: Georgia, "Times New Roman", serif;
+}
+
+.book-hover-label-wrap {
+  pointer-events: none;
+}
+
+.book-hover-label {
+  width: max-content;
+  max-width: min(260px, 70vw);
+  min-width: 168px;
+  padding: 9px 12px 8px;
+  text-align: left;
+  transform: translateY(-4px);
+  animation: book-hover-float 1.5s ease-in-out infinite alternate;
+}
+
+.book-hover-label strong,
+.book-hover-label span {
+  display: block;
+}
+
+.book-hover-label strong {
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.book-hover-label span {
+  margin-top: 4px;
+  font-size: 0.66rem;
+  line-height: 1.35;
+}
+
+@keyframes book-hover-float {
+  from {
+    transform: translateY(-2px);
+  }
+  to {
+    transform: translateY(-8px);
+  }
 }
 
 .book-letter::before {
@@ -1171,8 +1212,18 @@ a.work-panel:hover .work-title {
   }
 
   .book-letter {
+    width: calc(100% - 24px);
     max-height: calc(100% - 140px);
-    padding: 30px 26px 34px;
+    padding: 28px 22px 32px;
+    transform: translate(-50%, -50%);
+  }
+
+  .book-letter h3 {
+    font-size: clamp(1.45rem, 8vw, 2rem);
+  }
+
+  .room-hint {
+    max-width: 100%;
   }
 }
 
@@ -1733,7 +1784,29 @@ a.work-panel:hover .work-title {
   }
 
   .site-header {
+    gap: 10px;
     padding-block: 12px;
+  }
+
+  .site-logo,
+  .theme-toggle {
+    display: inline-flex;
+    min-height: 30px;
+    align-items: center;
+  }
+
+  .site-hud {
+    gap: 8px;
+    margin-left: auto;
+    font-size: 0.68rem;
+  }
+
+  .theme-toggle {
+    font-size: 0.68rem;
+  }
+
+  .theme-toggle .key-hint {
+    display: none;
   }
 
   .bottle-hero {
@@ -1748,8 +1821,8 @@ a.work-panel:hover .work-title {
 
   .bottle-stage {
     width: min(100%, 390px);
-    height: min(62vh, 500px);
-    min-height: 390px;
+    height: clamp(320px, 58svh, 440px);
+    min-height: 320px;
   }
 
   .bottle-stage::after {
@@ -1826,6 +1899,36 @@ a.work-panel:hover .work-title {
 
   .footer-profile-copy span {
     font-size: 0.78rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .site-hud {
+    display: none;
+  }
+
+  .site-header {
+    justify-content: space-between;
+  }
+
+  .theme-toggle {
+    margin-left: auto;
+  }
+
+  .bottle-stage {
+    height: 310px;
+    min-height: 310px;
+  }
+}
+
+@media (max-width: 760px) and (orientation: landscape) {
+  .bottle-stage {
+    height: 320px;
+    min-height: 280px;
+  }
+
+  .room-stage {
+    min-height: 420px;
   }
 }
 

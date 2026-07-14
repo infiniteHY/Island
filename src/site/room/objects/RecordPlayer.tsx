@@ -1,7 +1,8 @@
-import { Text, useTexture } from "@react-three/drei";
+import { useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import { CanvasTextPlane } from "../CanvasTextPlane";
 import { useRoomStore } from "../roomStore";
 import { RoomObjectLabel } from "../RoomObjectLabel";
 
@@ -220,17 +221,18 @@ export function RecordPlayer({ reducedMotion }: { reducedMotion: boolean }) {
                 emissiveIntensity={lit ? 0.35 : 0}
               />
             </mesh>
-            <Text
+            <CanvasTextPlane
+              text={id.toUpperCase()}
               position={[0, 0.014, 0]}
               rotation={[-Math.PI / 2, 0, 0]}
-              fontSize={0.02}
-              letterSpacing={0.1}
+              width={0.095}
+              height={0.024}
+              fontSize={78}
+              fontWeight={700}
               color="#efe7d2"
-              anchorX="center"
-              anchorY="middle"
-            >
-              {id.toUpperCase()}
-            </Text>
+              padding={4}
+              maxLines={1}
+            />
           </group>
         );
       })}
